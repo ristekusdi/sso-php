@@ -1,0 +1,22 @@
+{
+    "name": "ristekusdi/sso-php",
+    "description": "SSO for internal Udayana projects based on PHP",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "RistekUSDI\\SSO\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "illuminate/support": "5.8",
+        "guzzlehttp/guzzle": "6.5"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Riset dan Teknologi USDI",
+            "email": "usdi@unud.ac.id"
+        }
+    ]
+}
