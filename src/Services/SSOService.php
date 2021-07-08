@@ -6,7 +6,6 @@ use Exception;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
-use Illuminate\Support\Arr;
 use RistekUSDI\SSO\Auth\AccessToken;
 use RistekUSDI\SSO\Support\OpenIDConfig;
 
@@ -116,7 +115,27 @@ class SSOService
             // $this->redirectLogout = Config::get('sso.redirect_logout');
         }
 
-        $this->state = $this->generateRandomState();
+        $this->state = generate_random_state();
+    }
+
+    /**
+     * Return the client id for requests
+     *
+     * @return string
+     */
+    protected function getClientId()
+    {
+        return $this->clientId;
+    }
+
+    /**
+     * Return the state for requests
+     *
+     * @return string
+     */
+    protected function getState()
+    {
+        return $this->state;
     }
 
     /**
@@ -137,7 +156,7 @@ class SSOService
             'state' => $this->getState(),
         ];
 
-        return $this->buildUrl($url, $params);
+        return build_url($url, $params);
     }
 
     /**
@@ -158,7 +177,7 @@ class SSOService
             'redirect_uri' => $this->redirectLogout,
         ];
 
-        return $this->buildUrl($url, $params);
+        return build_url($url, $params);
     }
 
     /**
@@ -231,8 +250,7 @@ class SSOService
                 $token = json_decode($token, true);
             }
         } catch (GuzzleException $e) {
-            echo 
-            $this->logException($e);
+            log_exception($e);
         }
 
         return $token;
@@ -260,7 +278,7 @@ class SSOService
             $response = (new \GuzzleHttp\Client())->request('POST', $url, ['form_params' => $params]);
             return $response->getStatusCode() === 204;
         } catch (GuzzleException $e) {
-            $this->logException($e);
+            log_exception($e);
         }
 
         return false;
@@ -310,9 +328,9 @@ class SSOService
             // Validate retrieved user is owner of token
             $token->validateSub($user['sub'] ?? '');
         } catch (GuzzleException $e) {
-            $this->logException($e);
+            log_exception($e);
         } catch (Exception $e) {
-            $this->logException($e);
+            return '[Keycloak Service] '.print_r($e->getMessage(), true);
         }
 
         return $user;
@@ -481,72 +499,6 @@ class SSOService
     }
 
     /**
-     * Build a URL with params
-     *
-     * @param  string $url
-     * @param  array $params
-     * @return string
-     */
-    public function buildUrl($url, $params)
-    {
-        $parsedUrl = parse_url($url);
-        if (empty($parsedUrl['host'])) {
-            return trim($url, '?') . '?' . Arr::query($params);
-        }
-
-        if (! empty($parsedUrl['port'])) {
-            $parsedUrl['host'] .= ':' . $parsedUrl['port'];
-        }
-
-        $parsedUrl['scheme'] = (empty($parsedUrl['scheme'])) ? 'https' : $parsedUrl['scheme'];
-        $parsedUrl['path'] = (empty($parsedUrl['path'])) ? '' : $parsedUrl['path'];
-
-        $url = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $parsedUrl['path'];
-        $query = [];
-
-        if (! empty($parsedUrl['query'])) {
-            $parsedUrl['query'] = explode('&', $parsedUrl['query']);
-
-            foreach ($parsedUrl['query'] as $value) {
-                $value = explode('=', $value);
-
-                if (count($value) < 2) {
-                    continue;
-                }
-
-                $key = array_shift($value);
-                $value = implode('=', $value);
-
-                $query[$key] = urldecode($value);
-            }
-        }
-
-        $query = array_merge($query, $params);
-
-        return $url . '?' . Arr::query($query);
-    }
-
-    /**
-     * Return the client id for requests
-     *
-     * @return string
-     */
-    protected function getClientId()
-    {
-        return $this->clientId;
-    }
-
-    /**
-     * Return the state for requests
-     *
-     * @return string
-     */
-    protected function getState()
-    {
-        return $this->state;
-    }
-
-    /**
      * Check we need to refresh token and refresh if needed
      *
      * @param  array $credentials
@@ -572,36 +524,5 @@ class SSOService
 
         $this->saveToken($credentials);
         return $credentials;
-    }
-
-    /**
-     * Log a GuzzleException
-     *
-     * @param  GuzzleException $e
-     * @return void
-     */
-    protected function logException(GuzzleException $e)
-    {
-        // Guzzle 7
-        if (! method_exists($e, 'getResponse') || empty($e->getResponse())) {
-            return '[Keycloak Service] ' . $e->getMessage();
-        }
-
-        $error = [
-            'request' => method_exists($e, 'getRequest') ? $e->getRequest() : '',
-            'response' => $e->getResponse()->getBody()->getContents(),
-        ];
-
-        return '[Keycloak Service] ' . print_r($error, true);
-    }
-
-    /**
-     * Return a random state parameter for authorization
-     *
-     * @return string
-     */
-    protected function generateRandomState()
-    {
-        return bin2hex(random_bytes(16));
     }
 }

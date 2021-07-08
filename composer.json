@@ -5,7 +5,10 @@
     "autoload": {
         "psr-4": {
             "RistekUSDI\\SSO\\": "src/"
-        }
+        },
+        "files": [
+            "src/helpers.php"
+        ]
     },
     "minimum-stability": "dev",
     "require": {
