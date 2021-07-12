@@ -86,3 +86,26 @@ if (!function_exists('build_url')) {
         return $url . '?' . Arr::query($query);
     }
 }
+
+if (!function_exists('url')) {
+    function url($params = '')
+    {
+        $link = '';
+        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
+            $link = 'https';
+        } else {
+            $link = 'http';
+        }
+
+        // Append common URL characters
+        $link .= '://';
+
+        // Append the host (domain name, ip) to the URL.
+        $link .= $_SERVER['HTTP_HOST'];
+
+        // Append the requested resource location to the URL.
+        $link .= !empty($params) ? $params : $_SERVER['REQUEST_URI'];
+
+        return $link;
+    }
+}

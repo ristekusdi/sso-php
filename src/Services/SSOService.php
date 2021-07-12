@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
 use RistekUSDI\SSO\Auth\AccessToken;
 use RistekUSDI\SSO\Support\OpenIDConfig;
+use RistekUSDI\SSO\Support\Url;
 
 class SSOService
 {
@@ -171,7 +172,7 @@ class SSOService
         if (empty($this->redirectLogout)) {
             $this->redirectLogout = url('/');
         }
-
+        
         $params = [
             'client_id' => $this->getClientId(),
             'redirect_uri' => $this->redirectLogout,
