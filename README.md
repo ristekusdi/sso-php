@@ -16,7 +16,15 @@ composer require ristekusdi/sso-php
 
 ## Konfigurasi
 
-Memasang nilai di Environment file
+Buatlah file bernama `.env` di root project dan isian dari file .env sebagai berikut.
+
+```env
+SSO_BASE_URL=
+SSO_REALM=
+SSO_REALM_PUBLIC_KEY=
+SSO_CLIENT_ID=
+SSO_CLIENT_SECRET=
+```
 
 - `SSO_BASE_URL`
 
