@@ -12,8 +12,10 @@
     },
     "minimum-stability": "dev",
     "require": {
+        "php": "^7.1",
         "illuminate/support": "5.8",
-        "guzzlehttp/guzzle": "6.5"
+        "guzzlehttp/guzzle": "6.5",
+        "vlucas/phpdotenv": "5.3"
     },
     "license": "MIT",
     "authors": [
