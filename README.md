@@ -202,7 +202,6 @@ class Webauth {
     }
 }
 ```
-</details>
 
 6. Buat sebuah file bernama `Xauth.php` di direktori `application/controllers`. Masukkan sintaks di bawah ini ke file tersebut.
 
@@ -355,6 +354,7 @@ $route['auth/change_role_active'] = 'xauth/change_role_active';
 ```
 
 > TODO: dokumentasi cara menggunakan $this->webauth dan perintah-perintah yang sering digunakan pada class $this->webauth.
+</details>
 
 ## Data Pengguna
 
