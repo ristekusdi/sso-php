@@ -203,6 +203,15 @@ class Webauth {
 }
 ```
 
+**Catatan:**
+
+Berikut ini perintah-perintah yang umumnya digunakan untuk autentikasi:
+
+- `$this->webauth->user()->get()` untuk mendapatkan data pengguna, `role_active`, `role_permissions` (permissions dari role active), `arr_menu`.
+- `$this->webauth->user()->roles()` untuk mendapatkan data roles yang melekat pada pengguna.
+- `$this->webauth->user()->hasRole($role)` untuk mengecek apakah pengguna memiliki role tertentu atau tidak (role bisa lebih dari 1 dengan format array) dan mengembalikan nilai bertipe boolean.
+- `$this->webauth->user()->hasPermission($permission)` untuk mengecek apakah pengguna memiliki permission tertentu atau tidak (permission bisa lebih dari 1 dengan format array) dan mengembalikan nilai booelan.
+
 6. Buat sebuah file bernama `Xauth.php` di direktori `application/controllers`. Masukkan sintaks di bawah ini ke file tersebut.
 
 ```php
@@ -353,7 +362,7 @@ $route['auth/callback'] = 'xauth/callback';
 $route['auth/change_role_active'] = 'xauth/change_role_active';
 ```
 
-> TODO: dokumentasi cara menggunakan $this->webauth dan perintah-perintah yang sering digunakan pada class $this->webauth.
+8. Agar halaman tertentu di dalam suatu proyek dilindungi oleh autentikasi, tambahkan perintah `$this->webauth->authenticated()` ke dalam `constructor` di suatu controller. Sehingga jika pengguna mengakses halaman tertentu belum terautentikasi maka di arahkan ke halaman login SSO.
 </details>
 
 ## Data Pengguna
