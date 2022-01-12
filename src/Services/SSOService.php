@@ -326,6 +326,12 @@ class SSOService
             $user = $response->getBody()->getContents();
             $user = json_decode($user, true);
 
+            // Get roles
+            $roles = ['roles' => []];
+            $roles = $token->parseAccessToken()['resource_access'][$_ENV['SSO_CLIENT_ID']];
+            
+            $user = array_merge($user, $roles);
+
             // Validate retrieved user is owner of token
             $token->validateSub($user['sub'] ?? '');
         } catch (GuzzleException $e) {
