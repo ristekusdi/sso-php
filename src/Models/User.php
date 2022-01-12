@@ -19,6 +19,7 @@ class User implements Authenticatable
         'preferred_username',
         'given_name',
         'family_name',
+        'roles',
         'unud_identifier_id',
         'unud_user_type_id',
         'unud_sso_id'
