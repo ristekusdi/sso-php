@@ -48,6 +48,15 @@ class WebGuard implements Guard
         }
 
         /**
+         * If user doesn't have access to certain client app then return false
+         */
+        $token = new AccessToken($credentials);
+        $token = $token->parseAccessToken();
+        if (!in_array($_ENV['SSO_CLIENT_ID'], array_keys($token['resource_access']))) {
+            return false;
+        }
+
+        /**
          * Store the section
          */
         $credentials['refresh_token'] = $credentials['refresh_token'] ?? '';
@@ -109,30 +118,13 @@ class WebGuard implements Guard
         return !empty(array_intersect((array) $permissions, $this->permissions()));
     }
 
-    public function roles($resource = '')
+    public function roles()
     {
         if (!$this->check()) {
             return false;
         }
 
-        if (empty($resource)) {
-            $resource = $_ENV['SSO_CLIENT_ID'];
-        }
-
-        $token = (new SSOService)->retrieveToken();
-
-        if (empty($token) || empty($token['access_token'])) {
-            return false;
-        }
-
-        $token = new AccessToken($token);
-        $token = $token->parseAccessToken();
-
-        $resourceRoles = $token['resource_access'] ?? [];
-        $resourceRoles = $resourceRoles[$resource] ?? [];
-        $resourceRoles = $resourceRoles['roles'] ?? [];
-
-        return $resourceRoles;
+        return $this->user()->roles;
     }
 
     /**
@@ -143,17 +135,12 @@ class WebGuard implements Guard
      *
      * @return boolean
      */
-    public function hasRole($roles, $resource = '')
+    public function hasRole($roles)
     {
         if (!$this->check()) {
             return false;
         }
 
-        if (empty($resource)) {
-            $resource = $_ENV['SSO_CLIENT_ID'];
-        }
-
-        $resourceRoles = $this->roles($resource);
-        return empty(array_diff((array) $roles, $resourceRoles));
+        return empty(array_diff((array) $roles, $this->roles()));
     }
 }
