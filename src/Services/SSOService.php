@@ -411,7 +411,8 @@ class SSOService
         if (session_status() === PHP_SESSION_NONE) {
             session_start(); 
         }
-        return $_SESSION[self::SSO_SESSION];
+
+        return isset($_SESSION[self::SSO_SESSION]) ? $_SESSION[self::SSO_SESSION] : '';
     }
 
     /**
