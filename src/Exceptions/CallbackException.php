@@ -14,8 +14,6 @@ class CallbackException extends \RuntimeException
      */
     public function __construct(string $error = '')
     {
-        $message = '[SSO Error] ' . $error;
-
-        parent::__construct($message);
+        echo '[SSO Error] ' . $error;
     }
 }
