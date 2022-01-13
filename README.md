@@ -270,17 +270,7 @@ class Xauth extends CI_Controller {
             $token = (new SSOService())->getAccessToken($code);
 
             if ((new WebGuard())->validate($token)) {
-                
-                $token = (new AccessToken($token))->parseAccessToken();
-                if (empty($token['resource_access'][$_ENV['SSO_CLIENT_ID']])) {
-                    show_error('Akses ditolak', 403);
-                }
-                
-                $roles = [];
-                if (!empty($_ENV['SSO_CLIENT_ID'])) {
-                    $resource_access = $token['resource_access'];
-                    $roles = $resource_access[$_ENV['SSO_CLIENT_ID']]['roles'];
-                }
+                $roles = (new WebGuard)->roles();
 
                 $role_active = $roles[0];
 
@@ -313,6 +303,8 @@ class Xauth extends CI_Controller {
                 $_SESSION['serialize_session'] = $serialize_session;
 
                 redirect('/home');
+            } else {
+                throw new CallbackException('Forbidden access');
             }
         }
     }
