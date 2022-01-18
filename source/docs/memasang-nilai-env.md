@@ -1,6 +1,6 @@
 ---
-title: Memasang Nilai di Environment File - SSO Laravel - RistekUSDI
-description: Memasang nilai di environment file pada SSO Laravel - RistekUSDI
+title: Memasang Nilai di Environment File - SSO PHP - RistekUSDI
+description: Memasang nilai di environment file pada SSO PHP - RistekUSDI
 extends: _layouts.documentation
 section: content
 ---
