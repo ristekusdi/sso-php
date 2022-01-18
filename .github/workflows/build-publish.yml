@@ -26,7 +26,4 @@ jobs:
         git add -f build_production && git commit -m "Build for deploy"
     - name: Publish
       run: | 
-        # first push run this command
-        git push origin `git subtree split --prefix build_production doc-site`:gh-pages
-        # next push run this command and skip the above command
-        # git push origin `git subtree split --prefix build_production doc-site`:gh-pages --force
+        git push origin `git subtree split --prefix build_production doc-site`:refs/heads/gh-pages --force
