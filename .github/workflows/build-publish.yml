@@ -1,0 +1,28 @@
+name: Build & Publish
+
+on:
+  push:
+    branches:
+      - doc-site
+    schedule:
+      # On Monday - Friday every 2 PM
+      - cron: "0 2 * * 1-5"
+
+jobs:
+  build-site:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install Composer dependencies
+      run: composer install --no-ansi --no-interaction --no-scripts --no-suggest --no-progress --prefer-dist
+    - name: Install NPM dependencies
+      run: npm install
+    - name: Build Site
+      run: npm run prod
+    - name: Stage & Commit Files
+      run: |
+        git config user.email "<>"
+        git config user.name "RistekUSDI on GitHub Actions"
+        git add -f build_production && git commit -m "Build for deploy"
+    - name: Publish
+      run: git push origin `git subtree split --prefix build_production doc-site`:gh-pages --force
