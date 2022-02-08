@@ -7,34 +7,22 @@ section: content
 
 # Memasang nilai di Environment file
 
-Salin format di bawah ini ke dalam file `.env`
+Anda akan mendapatkan isian konfigurasi berikut setelah membuat client app dan menyalin environment client app di IMISSU Dashboard.
 
 ```bash
-SSO_BASE_URL=
-SSO_REALM=
-SSO_REALM_PUBLIC_KEY=
-SSO_CLIENT_ID=
-SSO_CLIENT_SECRET=
+SSO_BASE_URL=https://your-sso-domain.com/auth
+SSO_REALM=master
+SSO_REALM_PUBLIC_KEY=xxxxxxxxxx
+SSO_CLIENT_ID=xxxxxxx
+SSO_CLIENT_SECRET=xxxxxx
+SSO_CALLBACK=http://yourapp.test/sso/callback
 ```
 
-- `SSO_BASE_URL`
+Isian konfigurasi tersebut dipasang pada file `.env`.
 
-SSO server Url. Contoh: `https://your-sso-domain.com/auth`
-
-- `SSO_REALM`
-
-SSO realm. Nilai bawaan adalah `master`.
-
-- `SSO_REALM_PUBLIC_KEY`
-
-SSO server realm public key. Dari dashboard menuju **Realm Settings** >> **Keys** >> **RS256** >> **Public key**
-
-- `SSO_CLIENT_ID`
-
-Dari dashboard **klik edit Client ID yang dipilih** >> **Settings** >> **salin nama Client ID di field Client ID**
-
-- `SSO_CLIENT_SECRET`
-
-> Pastikan pengaturan **Access Type** adalah **confidential** agar memperoleh nilai Secret
-
-Dari dashboard **klik edit Client ID yang dipilih** >> **Credentials** >> **salin isian Secret di field Secret**
+- `SSO_BASE_URL` adalah URL server SSO.
+- `SSO_REALM` adalah "realm" tempat client app Anda berada yang didapatkan dari IMISSU Dashboard.
+- `SSO_REALM_PUBLIC_KEY` adalah realm public key server SSO yang didapatkan dari IMISSU Dashboard.
+- `SSO_CLIENT_ID` adalah client id yang didapatkan dari IMISSU Dashboard.
+- `SSO_CLIENT_SECRET` adalah client secret yang didapatkan dari IMISSU Dashboard.
+- `SSO_CALLBACK` adalah callback URL yang berfungsi ketika proses login berhasil dari SSO.

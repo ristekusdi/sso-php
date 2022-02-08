@@ -7,11 +7,11 @@ section: content
 
 # Pendahuluan
 
-SSO PHP oleh RistekUSDI adalah sebuah pustaka berbasis bahasa pemrograman PHP dan platform Keycloak yang digunakan untuk otentikasi pengguna pada aplikasi internal Universitas Udayana.
+SSO PHP oleh RistekUSDI adalah sebuah pustaka berbasis bahasa pemrograman PHP dan platform Keycloak untuk otentikasi pengguna pada aplikasi internal Universitas Udayana.
 
 ## Kompatibilitas Versi
 
-Pustaka ini merekomendasikan menggunakan PHP versi minimal 7.1.
+Pustaka ini merekomendasikan menggunakan PHP versi minimal 7.2.
 
 ## Instalasi
 

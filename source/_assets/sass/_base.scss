@@ -106,10 +106,15 @@ li {
 ol,
 ul {
     @apply .my-4;
+    @apply .ml-4;
 }
 
 ol {
     @apply .list-decimal;
+}
+
+ul {
+    @apply .list-disc;
 }
 
 p {
