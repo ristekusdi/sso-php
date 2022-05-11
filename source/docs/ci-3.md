@@ -7,16 +7,16 @@ section: content
 
 # Konfigurasi CodeIgniter 3.x
 
-1. Melakukan perubahan nilai pada `base_url`, `composer_autoload` dan `enable_hooks` di file `application/config/config.php`.
+1. Lakukan perubahan nilai pada `base_url`, `composer_autoload` dan `enable_hooks` di file `application/config/config.php`.
 
 ```php
 <?php
 $config['base_url'] = "http://yourapp.test/";
 
-// Melakukan autoload composer di direktor `vendor` pada root project.
+// Ubah lokasi autoload composer di direktori `vendor` pada root project.
 $config['composer_autoload'] = "./vendor/autoload.php";
 
-// Mengaktifkan hooks pada file `application/config/hooks.php`.
+// Aktifkan hooks pada file `application/config/hooks.php`.
 $config['enable_hooks'] = TRUE;
 ```
 
@@ -54,7 +54,7 @@ class Webauth {
     public function authenticated()
     {
         if (! $this->check()) {
-            redirect('/auth/login');
+            redirect('/sso/login');
         }
     }
 
@@ -105,16 +105,14 @@ class Webauth {
 }
 ```
 
-**Catatan:**
+4. Tambahkan `webauth` sebagai autoload library di direktori `application/config/autoload.php`
 
-Berikut ini perintah-perintah yang umumnya digunakan untuk autentikasi:
+```php
+// ... artinya autoload library yang sudah pernah Anda tambahkan sebelumnya
+$autoload['libraries'] = array('...','webauth');
+```
 
-- `$this->webauth->user()->get()` untuk mendapatkan data pengguna, `role_active`, `role_permissions` (permissions dari role active), `arr_menu`.
-- `$this->webauth->user()->roles()` untuk mendapatkan data roles yang melekat pada pengguna.
-- `$this->webauth->user()->hasRole($role)` untuk mengecek apakah pengguna memiliki role tertentu atau tidak (role bisa lebih dari 1 dengan format array) dan mengembalikan nilai bertipe boolean.
-- `$this->webauth->user()->hasPermission($permission)` untuk mengecek apakah pengguna memiliki permission tertentu atau tidak (permission bisa lebih dari 1 dengan format array) dan mengembalikan nilai booelan.
-
-4. Buat sebuah file bernama `Xauth.php` di direktori `application/controllers`. Masukkan sintaks di bawah ini ke file tersebut.
+5. Buat sebuah file bernama `Xauth.php` di direktori `application/controllers`. Masukkan sintaks di bawah ini ke file tersebut.
 
 ```php
 <?php
@@ -257,3 +255,14 @@ $route['sso/change_role_active'] = 'xauth/change_role_active';
 ```
 
 6. Agar halaman tertentu di dalam suatu proyek dilindungi oleh autentikasi, tambahkan perintah `$this->webauth->authenticated()` ke dalam `constructor` di suatu controller. Sehingga jika pengguna mengakses halaman tertentu belum terautentikasi maka di arahkan ke halaman login SSO.
+
+**Catatan:**
+
+Berikut ini perintah-perintah yang umumnya digunakan untuk pengecekan otentikasi dan mengambil data otentikasi.
+
+- `$this->webauth->check()` untuk mengecek apakah ada pengguna yang login atau tidak.
+- `$this->webauth->authenticated()` untuk mengembalikan pengguna ke halaman login SSO jika belum login.
+- `$this->webauth->user()->get()` untuk mendapatkan data pengguna, `role_active`, `role_permissions` (permissions dari role active), `arr_menu` dan data-data lainnya yang diambil dari `$_SESSION`.
+- `$this->webauth->user()->roles()` untuk mendapatkan data roles yang melekat pada pengguna.
+- `$this->webauth->user()->hasRole($role)` untuk mengecek apakah pengguna memiliki role tertentu atau tidak (role bisa lebih dari 1 dengan format array) dan mengembalikan nilai bertipe boolean.
+- `$this->webauth->user()->hasPermission($permission)` untuk mengecek apakah pengguna memiliki permission tertentu atau tidak (permission bisa lebih dari 1 dengan format array) dan mengembalikan nilai booelan.
