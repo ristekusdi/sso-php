@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+ <url>
+  <loc>https://ristekusdi.github.io/sso-php</loc>
+  <lastmod>2022-05-11T08:00:26+00:00</lastmod>
+  <changefreq>daily</changefreq>
+ </url>
+ <url>
+  <loc>https://ristekusdi.github.io/sso-php/docs/php</loc>
+  <lastmod>2022-05-11T08:00:26+00:00</lastmod>
+  <changefreq>daily</changefreq>
+ </url>
+ <url>
+  <loc>https://ristekusdi.github.io/sso-php/docs/ssd</loc>
+  <lastmod>2022-05-11T08:00:26+00:00</lastmod>
+  <changefreq>daily</changefreq>
+ </url>
+ <url>
+  <loc>https://ristekusdi.github.io/sso-php/docs/memasang-nilai-env</loc>
+  <lastmod>2022-05-11T08:00:26+00:00</lastmod>
+  <changefreq>daily</changefreq>
+ </url>
+ <url>
+  <loc>https://ristekusdi.github.io/sso-php/docs/ci-3</loc>
+  <lastmod>2022-05-11T08:00:26+00:00</lastmod>
+  <changefreq>daily</changefreq>
+ </url>
+ <url>
+  <loc>https://ristekusdi.github.io/sso-php/docs/data-pengguna</loc>
+  <lastmod>2022-05-11T08:00:26+00:00</lastmod>
+  <changefreq>daily</changefreq>
+ </url>
+</urlset>
