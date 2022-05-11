@@ -242,6 +242,30 @@ class Xauth extends CI_Controller {
         header('Content-Type: application/json');
         echo json_encode($arr);
     }
+
+    /**
+     * Change key value (kv) active
+     */
+    public function change_kv_active()
+    { 
+        // Check if this session active? If not then redirect to login page.
+        $this->webauth->authenticated();
+
+        $value = $this->input->post('value');
+        $unserialize_session = unserialize($_SESSION['serialize_session']);
+        $unserialize_session[$this->input->post('key')] = $value;
+        
+        $serialize_session = serialize($unserialize_session);
+        $_SESSION['serialize_session'] = $serialize_session;
+
+        $arr = array(
+            'submit' => '1',
+            'link' => ""
+        );
+
+        header('Content-Type: application/json');
+        echo json_encode($arr);
+    }
 }
 ```
 
@@ -252,6 +276,7 @@ $route['sso/login'] = 'xauth/login';
 $route['sso/logout'] = 'xauth/logout';
 $route['sso/callback'] = 'xauth/callback';
 $route['sso/change_role_active'] = 'xauth/change_role_active';
+$route['sso/change_kv_active'] = 'xauth/change_kv_active';
 ```
 
 6. Agar halaman tertentu di dalam suatu proyek dilindungi oleh autentikasi, tambahkan perintah `$this->webauth->authenticated()` ke dalam `constructor` di suatu controller. Sehingga jika pengguna mengakses halaman tertentu belum terautentikasi maka di arahkan ke halaman login SSO.
