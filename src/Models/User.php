@@ -22,7 +22,10 @@ class User implements Authenticatable
         'roles',
         'unud_identifier_id',
         'unud_user_type_id',
-        'unud_sso_id'
+        'unud_sso_id',
+        'picture',
+        'address',
+        'phone_number'
     ];
 
     /**
