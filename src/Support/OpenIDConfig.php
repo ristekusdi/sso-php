@@ -2,8 +2,6 @@
 
 namespace RistekUSDI\SSO\Support;
 
-use Illuminate\Support\Arr;
-
 class OpenIDConfig
 {
     /**
@@ -90,6 +88,13 @@ class OpenIDConfig
             $this->openid = $this->config();
         }
 
-        return Arr::get($this->openid, $name);
+        $result = null;
+        foreach ($this->openid as $key => $value) {
+            if ($key === $name) {
+                $result = $value;
+            }
+        }
+
+        return $result;
     }
 }

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Arr;
 use GuzzleHttp\Exception\GuzzleException;
 
 /**
@@ -39,6 +38,13 @@ if (!function_exists('log_exception')) {
     }
 }
 
+if (!function_exists('build_http_query')) {
+    function build_http_query($array)
+    {
+        return http_build_query($array, '', '&', PHP_QUERY_RFC3986);
+    }
+}
+
 /**
  * Build a URL with params
  *
@@ -51,7 +57,7 @@ if (!function_exists('build_url')) {
     {
         $parsedUrl = parse_url($url);
         if (empty($parsedUrl['host'])) {
-            return trim($url, '?') . '?' . Arr::query($params);
+            return trim($url, '?') . '?' . build_http_query($params);
         }
 
         if (! empty($parsedUrl['port'])) {
@@ -83,7 +89,7 @@ if (!function_exists('build_url')) {
 
         $query = array_merge($query, $params);
 
-        return $url . '?' . Arr::query($query);
+        return $url . '?' . build_http_query($query);
     }
 }
 
