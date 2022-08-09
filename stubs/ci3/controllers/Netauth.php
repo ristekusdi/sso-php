@@ -6,7 +6,7 @@ use RistekUSDI\SSO\Services\SSOService;
 use RistekUSDI\SSO\Auth\Guard\WebGuard;
 use RistekUSDI\SSO\Auth\AccessToken;
 
-class Webauth extends CI_Controller {
+class Netauth extends CI_Controller {
 
     public function __construct()
     {
