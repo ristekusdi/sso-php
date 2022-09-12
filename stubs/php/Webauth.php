@@ -48,10 +48,13 @@ class Webauth
         if (!empty($code)) {
             $token = (new SSOService())->getAccessToken($code);
     
-            if ((new WebGuard())->validate($token)) {
+            try {
+                (new WebGuard())->validate($token);
                 // Ganti arah redirect sesuai kebutuhan
                 header('Location: dashboard.php');
                 exit();
+            } catch (\Exception $e) {
+                throw new CallbackException($e->getMessage(), $e->getCode());
             }
         }
     }   

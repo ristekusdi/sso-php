@@ -54,7 +54,9 @@ class Netauth extends CI_Controller {
         if (!empty($code)) {
             $token = (new SSOService())->getAccessToken($code);
 
-            if ((new WebGuard())->validate($token)) {
+            try {
+                (new WebGuard())->validate($token);
+
                 $roles = (new WebGuard)->roles();
 
                 $role_active = $roles[0];
@@ -88,8 +90,8 @@ class Netauth extends CI_Controller {
                 $_SESSION['serialize_session'] = $serialize_session;
 
                 redirect('/home');
-            } else {
-                throw new CallbackException('Forbidden access');
+            } catch (\Exception $e) {
+                throw new CallbackException($e->getMessage(), $e->getCode());
             }
         }
     }
