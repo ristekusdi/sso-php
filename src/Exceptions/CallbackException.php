@@ -12,8 +12,8 @@ class CallbackException extends \RuntimeException
      * @param array           $headers  [description]
      * @param int|integer     $code     [description]
      */
-    public function __construct(string $error = '')
+    public function __construct(string $error = '', int $code = 401)
     {
-        echo '[SSO Error] ' . $error;
+        echo "[SSO Error] {$error} with HTTP code response {$code}";
     }
 }

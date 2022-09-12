@@ -44,17 +44,23 @@ class WebGuard implements Guard
     public function validate(array $credentials = [])
     {
         if (empty($credentials['access_token']) || empty($credentials['id_token'])) {
-            return false;
+            throw new \Exception('Credentials must have access_token and id_token!');
+        }
+
+        $token = new AccessToken($credentials);
+        if (empty($token->getAccessToken())) {
+            throw new \Exception('Access Token is invalid.');
         }
 
         /**
-         * If user doesn't have access to certain client app then return false
+         * If user doesn't have access to certain client app then throw exception
          */
-        $token = new AccessToken($credentials);
-        $token = $token->parseAccessToken();
-        if (!in_array($_ENV['SSO_CLIENT_ID'], array_keys($token['resource_access']))) {
-            return false;
+        $access_token = $token->parseAccessToken();
+        if (!in_array($_ENV['SSO_CLIENT_ID'], array_keys($access_token['resource_access']))) {
+            throw new \Exception('Unauthorized', 403);
         }
+
+        $token->validateIdToken((new SSOService)->getClaims());
 
         /**
          * Store the section

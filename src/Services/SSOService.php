@@ -537,4 +537,15 @@ class SSOService
         $this->saveToken($credentials);
         return $credentials;
     }
+
+    /**
+     * Get claims based on client id and issuer
+     */
+    public function getClaims()
+    {
+        return array(
+            'aud' => $this->getClientId(),
+            'iss' => (new OpenIDConfig)->get('issuer'),
+        );
+    }
 }
