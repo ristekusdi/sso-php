@@ -1,6 +1,6 @@
 <?php
 
-namespace RistekUSDI\SSO\Exceptions;
+namespace RistekUSDI\SSO\PHP\Exceptions;
 
 class CallbackException extends \RuntimeException
 {

@@ -1,12 +1,12 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use RistekUSDI\SSO\Exceptions\CallbackException;
-use RistekUSDI\SSO\Services\SSOService;
-use RistekUSDI\SSO\Auth\Guard\WebGuard;
-use RistekUSDI\SSO\Auth\AccessToken;
+use RistekUSDI\SSO\PHP\Exceptions\CallbackException;
+use RistekUSDI\SSO\PHP\Services\SSOService;
+use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard;
+use RistekUSDI\SSO\PHP\Auth\AccessToken;
 
-class Netauth extends CI_Controller {
+class Webauth extends CI_Controller {
 
     public function __construct()
     {
@@ -102,7 +102,7 @@ class Netauth extends CI_Controller {
     public function change_role_active()
     { 
         // Check if this session active? If not then redirect to login page.
-        $this->webauth->authenticated();
+        $this->webguard->authenticated();
 
         $role_active = $this->input->post('role_active');
         $unserialize_session = unserialize($_SESSION['serialize_session']);
@@ -136,7 +136,7 @@ class Netauth extends CI_Controller {
     public function change_kv_active()
     { 
         // Check if this session active? If not then redirect to login page.
-        $this->webauth->authenticated();
+        $this->webguard->authenticated();
 
         $value = $this->input->post('value');
         $unserialize_session = unserialize($_SESSION['serialize_session']);

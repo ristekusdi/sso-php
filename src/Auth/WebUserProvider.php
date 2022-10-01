@@ -1,6 +1,6 @@
 <?php
 
-namespace RistekUSDI\SSO\Auth;
+namespace RistekUSDI\SSO\PHP\Auth;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;

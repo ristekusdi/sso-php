@@ -9,7 +9,7 @@ if (! is_file(sprintf('%s/vendor/autoload.php', $root))) {
 
 require sprintf('%s/vendor/autoload.php', $root);
 
-use RistekUSDI\SSO\Commands\Copy;
+use RistekUSDI\SSO\PHP\Commands\Copy;
 use Symfony\Component\Console\Application;
 
 $application = new Application();

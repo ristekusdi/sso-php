@@ -1,12 +1,12 @@
 <?php
 
-namespace RistekUSDI\SSO\Auth\Guard;
+namespace RistekUSDI\SSO\PHP\Auth\Guard;
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Guard;
-use RistekUSDI\SSO\Services\SSOService;
-use RistekUSDI\SSO\Auth\WebUserProvider;
-use RistekUSDI\SSO\Auth\AccessToken;
+use RistekUSDI\SSO\PHP\Services\SSOService;
+use RistekUSDI\SSO\PHP\Auth\WebUserProvider;
+use RistekUSDI\SSO\PHP\Auth\AccessToken;
 
 class WebGuard implements Guard
 {
@@ -91,7 +91,7 @@ class WebGuard implements Guard
             return false;
         }
 
-        $provider = new WebUserProvider((new \ReflectionClass('RistekUSDI\SSO\Models\User'))->getName());
+        $provider = new WebUserProvider((new \ReflectionClass('RistekUSDI\SSO\PHP\Models\User'))->getName());
         $user = $provider->retrieveByCredentials($user);
         $this->setUser($user);
 

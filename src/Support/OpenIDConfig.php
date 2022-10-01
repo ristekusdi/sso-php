@@ -1,6 +1,6 @@
 <?php
 
-namespace RistekUSDI\SSO\Support;
+namespace RistekUSDI\SSO\PHP\Support;
 
 class OpenIDConfig
 {

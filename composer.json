@@ -4,7 +4,7 @@
     "type": "library",
     "autoload": {
         "psr-4": {
-            "RistekUSDI\\SSO\\": "src/"
+            "RistekUSDI\\SSO\\PHP\\": "src/"
         },
         "files": [
             "src/helpers.php"

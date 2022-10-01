@@ -1,14 +1,14 @@
 <?php
 
-namespace RistekUSDI\SSO\Services;
+namespace RistekUSDI\SSO\PHP\Services;
 
 use Exception;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Response;
-use RistekUSDI\SSO\Auth\AccessToken;
-use RistekUSDI\SSO\Support\OpenIDConfig;
-use RistekUSDI\SSO\Support\Url;
+use RistekUSDI\SSO\PHP\Auth\AccessToken;
+use RistekUSDI\SSO\PHP\Support\OpenIDConfig;
+use RistekUSDI\SSO\PHP\Support\Url;
 
 class SSOService
 {

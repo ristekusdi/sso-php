@@ -1,9 +1,9 @@
 <?php
 
-namespace RistekUSDI\SSO\Models;
+namespace RistekUSDI\SSO\PHP\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
-use RistekUSDI\SSO\Auth\Guard\WebGuard;
+use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard;
 
 class User implements Authenticatable
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace RistekUSDI\SSO\Commands;
+namespace RistekUSDI\SSO\PHP\Commands;
 
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

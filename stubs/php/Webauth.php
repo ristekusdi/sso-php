@@ -1,8 +1,8 @@
 <?php
 
-use RistekUSDI\SSO\Exceptions\CallbackException;
-use RistekUSDI\SSO\Services\SSOService;
-use RistekUSDI\SSO\Auth\Guard\WebGuard;
+use RistekUSDI\SSO\PHP\Exceptions\CallbackException;
+use RistekUSDI\SSO\PHP\Services\SSOService;
+use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard;
 
 class Webauth
 {
