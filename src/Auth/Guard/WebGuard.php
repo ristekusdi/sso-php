@@ -94,13 +94,12 @@ class WebGuard implements Guard
         $provider = new WebUserProvider((new \ReflectionClass('RistekUSDI\SSO\PHP\Models\User'))->getName());
         $user = $provider->retrieveByCredentials($user);
         $this->setUser($user);
-
-        return true;
     }
 
     public function setUser(Authenticatable $user)
     {
         $this->user = $user;
+        return $this;
     }
 
     public function permissions()
