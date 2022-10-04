@@ -72,13 +72,6 @@ class SSOService
     protected $callbackUrl;
 
     /**
-     * RedirectLogout
-     *
-     * @var array
-     */
-    protected $redirectLogout;
-
-    /**
      * The state for authorization request
      *
      * @var string
@@ -109,11 +102,6 @@ class SSOService
 
         if (is_null($this->callbackUrl)) {
             $this->callbackUrl = $_SERVER['SSO_CALLBACK'];
-        }
-
-        if (is_null($this->redirectLogout)) {
-            // Later
-            // $this->redirectLogout = Config::get('sso.redirect_logout');
         }
 
         $this->state = generate_random_state();
@@ -168,10 +156,6 @@ class SSOService
     public function getLogoutUrl($id_token = null)
     {
         $url = (new OpenIDConfig)->get('end_session_endpoint');
-
-        if (empty($this->redirectLogout)) {
-            $this->redirectLogout = url('/');
-        }
         
         $params = [
             'client_id' => $this->getClientId(),
@@ -179,7 +163,7 @@ class SSOService
 
         if ($id_token !== null) {
             $params['id_token_hint'] = $id_token;
-            $params['post_logout_redirect_uri'] = $this->redirectLogout;
+            $params['post_logout_redirect_uri'] = url('/');
         }
 
         return build_url($url, $params);
