@@ -314,11 +314,11 @@ class SSOService
             $user = $response->getBody()->getContents();
             $user = json_decode($user, true);
 
-            // Get roles
+            // Get client roles
             $roles = ['roles' => []];
             $roles = $token->parseAccessToken()['resource_access'][$_SERVER['SSO_CLIENT_ID']];
             
-            $user = array_merge($user, $roles);
+            $user = array_merge($user, ['client_roles' => $roles['roles']]);
 
             // Validate retrieved user is owner of token
             $token->validateSub($user['sub'] ?? '');
