@@ -2,7 +2,7 @@
 
 use RistekUSDI\SSO\PHP\Exceptions\CallbackException;
 use RistekUSDI\SSO\PHP\Services\SSOService;
-use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard;
+use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard as Guard;
 use RistekUSDI\SSO\PHP\Auth\AccessToken;
 
 class Webguard {
@@ -11,7 +11,7 @@ class Webguard {
 
     public function __construct()
     {
-        $this->user = (new WebGuard)->user();
+        $this->user = (new Guard)->user();
     }
 
     /**
@@ -26,12 +26,12 @@ class Webguard {
 
     public function check()
     {
-        return (new WebGuard())->check();
+        return (new Guard())->check();
     }
 
     public function guest()
     {
-        return (new WebGuard())->guest();
+        return (new Guard())->guest();
     }
 
     public function user()
