@@ -37,6 +37,7 @@ class Webguard {
     public function user()
     {
         $unserialize_session = unserialize($_SESSION['serialize_session']);
+        $this->user->roles = $unserialize_session['roles'];
         $this->user->role_active = $unserialize_session['role_active'];
         $this->user->role_permissions = $unserialize_session['role_permissions'];
         $this->user->arr_menu = $unserialize_session['arr_menu'];
@@ -46,13 +47,6 @@ class Webguard {
     public function get()
     {
         return $this->user;
-    }
-
-    public function roles()
-    {
-        $unserialize_session = unserialize($_SESSION['serialize_session']);
-        $this->user->roles = $unserialize_session['roles'];
-        return $this->user->roles;
     }
     
     public function hasRole($roles)

@@ -40,14 +40,14 @@ class Webauth extends CI_Controller {
             $error = $_GET['error_description'];
             $error = !empty($error) ? $error : $_GET['error'];
 
-            throw new CallbackException($error);
+            throw new CallbackException(401, $error);
         }
 
         $state = $_GET['state'];
         if (empty($state) || ! (new SSOService())->validateState($state)) {
             (new SSOService())->forgetState();
 
-            throw new CallbackException('Invalid state');
+            throw new CallbackException(401, 'Invalid state');
         }
 
         $code = $_GET['code'];
@@ -91,7 +91,7 @@ class Webauth extends CI_Controller {
 
                 redirect('/home');
             } catch (\Exception $e) {
-                throw new CallbackException($e->getMessage(), $e->getCode());
+                throw new CallbackException($e->getCode(), $e->getMessage());
             }
         }
     }
