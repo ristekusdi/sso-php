@@ -19,7 +19,7 @@ class User implements Authenticatable
         'preferred_username',
         'given_name',
         'family_name',
-        'roles',
+        'client_roles',
         'unud_identifier_id',
         'unud_user_type_id',
         'unud_sso_id',
@@ -44,22 +44,11 @@ class User implements Authenticatable
     {
         foreach ($profile as $key => $value) {
             if (in_array($key, $this->fillable)) {
-                switch ($key) {
-                    case 'name':
-                        $key = 'full_identity';
-                        break;
-                    case 'family_name':
-                        $key = 'name';
-                        break;
-                    case 'given_name':
-                        $key = 'identifier';
-                        break;
-                    case 'preferred_username':
-                        $key = 'username';
-                        break;
-                }
                 $this->attributes[ $key ] = $value;
             }
+            $this->attributes['username'] = $profile['preferred_username'];
+            $this->attributes['identity'] = $profile['given_name'];
+            $this->attributes['full_identity'] = $profile['name'];
         }
 
         $this->id = $this->getKey();
@@ -83,7 +72,7 @@ class User implements Authenticatable
      */
     public function getKey()
     {
-        return $this->email;
+        return $this->preferred_username;
     }
 
     /**
@@ -93,7 +82,7 @@ class User implements Authenticatable
      */
     public function getAuthIdentifierName()
     {
-        return 'email';
+        return 'preferred_username';
     }
 
     /**
