@@ -107,43 +107,6 @@ class User implements Authenticatable
     }
 
     /**
-     * Check user has roles
-     *
-     * @see WebGuard::hasRole()
-     *
-     * @param  string|array  $roles
-     * @param  string  $resource
-     * @return boolean
-     */
-    public function hasRole($roles, $resource = '')
-    {
-        // return Auth::hasRole($roles, $resource);
-    }
-
-    /**
-     * Get list of permission authenticate user
-     *
-     * @return array
-     */
-    public function permissions()
-    {
-        return (new WebGuard)->permissions();
-    }
-
-    /**
-     * Check user has permissions
-     *
-     * @see WebGuard::hasPermission()
-     *
-     * @param  string|array  $permissions
-     * @return boolean
-     */
-    public function hasPermission($permissions)
-    {
-        // return Auth::hasPermission($permissions);
-    }
-
-    /**
      * Get the password for the user.
      *
      * @return string
