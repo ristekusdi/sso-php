@@ -88,27 +88,27 @@ class SSOService
     public function __construct()
     {
         if (is_null($this->baseUrl)) {
-            $this->baseUrl = trim($_ENV['SSO_BASE_URL'], '/');
+            $this->baseUrl = trim($_SERVER['SSO_BASE_URL'], '/');
         }
 
         if (is_null($this->realm)) {
-            $this->realm = $_ENV['SSO_REALM'];
+            $this->realm = $_SERVER['SSO_REALM'];
         }
 
         if (is_null($this->clientId)) {
-            $this->clientId = $_ENV['SSO_CLIENT_ID'];
+            $this->clientId = $_SERVER['SSO_CLIENT_ID'];
         }
 
         if (is_null($this->clientSecret)) {
-            $this->clientSecret = $_ENV['SSO_CLIENT_SECRET'];
+            $this->clientSecret = $_SERVER['SSO_CLIENT_SECRET'];
         }
 
         if (is_null($this->cacheOpenid)) {
-            $this->cacheOpenid = isset($_ENV['SSO_CACHE_OPENID']) ? $_ENV['SSO_CACHE_OPENID'] : false;
+            $this->cacheOpenid = isset($_SERVER['SSO_CACHE_OPENID']) ? $_SERVER['SSO_CACHE_OPENID'] : false;
         }
 
         if (is_null($this->callbackUrl)) {
-            $this->callbackUrl = $_ENV['SSO_CALLBACK'];
+            $this->callbackUrl = $_SERVER['SSO_CALLBACK'];
         }
 
         if (is_null($this->redirectLogout)) {
@@ -332,7 +332,7 @@ class SSOService
 
             // Get roles
             $roles = ['roles' => []];
-            $roles = $token->parseAccessToken()['resource_access'][$_ENV['SSO_CLIENT_ID']];
+            $roles = $token->parseAccessToken()['resource_access'][$_SERVER['SSO_CLIENT_ID']];
             
             $user = array_merge($user, $roles);
 
@@ -363,7 +363,7 @@ class SSOService
                 ],
                 'form_params' => [
                     'grant_type' => 'urn:ietf:params:oauth:grant-type:uma-ticket',
-                    'audience' => $_ENV['SSO_CLIENT_ID']
+                    'audience' => $_SERVER['SSO_CLIENT_ID']
                 ]
             ]
         );
@@ -379,7 +379,7 @@ class SSOService
         // Introspection permissions
         $response = (new \GuzzleHttp\Client())->request('POST', (new OpenIDConfig)->get('token_introspection_endpoint'), [
             'auth' => [
-                $_ENV['SSO_CLIENT_ID'], $_ENV['SSO_CLIENT_SECRET']
+                $_SERVER['SSO_CLIENT_ID'], $_SERVER['SSO_CLIENT_SECRET']
             ],
             'form_params' => [
                 'token_type_hint' => 'requesting_party_token',
