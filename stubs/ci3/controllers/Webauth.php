@@ -57,7 +57,7 @@ class Webauth extends CI_Controller {
             try {
                 (new WebGuard())->validate($token);
 
-                $roles = (new WebGuard)->roles();
+                $roles = (new WebGuard)->user()->client_roles;
 
                 $role_active = $roles[0];
 
