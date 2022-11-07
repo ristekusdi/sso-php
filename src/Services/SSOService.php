@@ -288,7 +288,7 @@ class SSOService
             $token = new AccessToken($credentials);
 
             if (empty($token->getAccessToken())) {
-                throw new Exception('Access Token is invalid.');
+                return [];
             }
 
             $claims = array(
@@ -308,7 +308,7 @@ class SSOService
             $response = (new \GuzzleHttp\Client())->request('GET', $url, ['headers' => $headers]);
 
             if ($response->getStatusCode() !== 200) {
-                throw new Exception('Was not able to get userinfo (not 200)');
+                return [];
             }
 
             $user = $response->getBody()->getContents();
