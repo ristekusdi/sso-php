@@ -51,7 +51,7 @@ class Webguard {
     
     public function hasRole($roles)
     {
-        $result = empty(array_diff((array) $roles, $this->roles()));        
+        $result = empty(array_diff((array) $roles, $this->user()->get()->roles));        
         $this->user->hasRole = $result;
         return $this->user->hasRole;
     }
