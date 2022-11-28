@@ -91,6 +91,12 @@ class WebGuard implements Guard
             return false;
         }
 
+        // Get client roles
+        $roles = ['roles' => []];
+        $roles = (new AccessToken($credentials))->parseAccessToken()['resource_access'][$_SERVER['SSO_CLIENT_ID']];
+        
+        $user = array_merge($user, ['client_roles' => $roles['roles']]);
+
         $provider = new WebUserProvider((new \ReflectionClass('RistekUSDI\SSO\PHP\Models\User'))->getName());
         $user = $provider->retrieveByCredentials($user);
         $this->setUser($user);
