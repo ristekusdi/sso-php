@@ -27,10 +27,7 @@ class Webauth extends CI_Controller {
     public function logout()
     {
         $sso = new SSOService;
-        $token = $sso->retrieveToken();
-        $sso->forgetToken();
-
-        $url = $sso->getLogoutUrl($token['id_token']);
+        $url = $sso->getLogoutUrl();
         return redirect($url);
     }
 

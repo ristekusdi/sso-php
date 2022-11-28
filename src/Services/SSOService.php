@@ -3,12 +3,9 @@
 namespace RistekUSDI\SSO\PHP\Services;
 
 use Exception;
-use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Psr7\Response;
 use RistekUSDI\SSO\PHP\Auth\AccessToken;
 use RistekUSDI\SSO\PHP\Support\OpenIDConfig;
-use RistekUSDI\SSO\PHP\Support\Url;
 
 class SSOService
 {
@@ -16,6 +13,7 @@ class SSOService
      * The Session key for token
      */
     const SSO_SESSION = '_sso_token';
+    const SSO_SESSION_IMPERSONATE = '_sso_token_impersonate';
 
     /**
      * The Session key for state
@@ -72,6 +70,13 @@ class SSOService
     protected $callbackUrl;
 
     /**
+     * RedirectUrl
+     *
+     * @var array
+     */
+    protected $redirectUrl;
+
+    /**
      * The state for authorization request
      *
      * @var string
@@ -104,6 +109,10 @@ class SSOService
             $this->callbackUrl = $_SERVER['SSO_CALLBACK'];
         }
 
+        if (is_null($this->redirectUrl)) {
+            $this->redirectUrl = $_SERVER['SSO_REDIRECT_URL'];
+        }
+
         $this->state = generate_random_state();
     }
 
@@ -118,6 +127,36 @@ class SSOService
     }
 
     /**
+     * Return the client secret
+     *
+     * @return string
+     */
+    protected function getClientSecret()
+    {
+        return $this->clientSecret;
+    }
+
+    /**
+     * Return the callback url
+     *
+     * @return string
+     */
+    public function getCallbackUrl()
+    {
+        return $this->callbackUrl;
+    }
+
+    /**
+     * Return the redirect url
+     *
+     * @return string
+     */
+    public function getRedirectUrl()
+    {
+        return $this->redirectUrl;
+    }
+
+    /**
      * Return the state for requests
      *
      * @return string
@@ -125,6 +164,139 @@ class SSOService
     protected function getState()
     {
         return $this->state;
+    }
+
+    /**
+     * Retrieve Token from Session
+     *
+     * @return array|null
+     */
+    public function retrieveToken()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(); 
+        }
+
+        if (isset($_SESSION[self::SSO_SESSION_IMPERSONATE])) {
+            return $_SESSION[self::SSO_SESSION_IMPERSONATE];
+        } else if (isset($_SESSION[self::SSO_SESSION])) {
+            return $_SESSION[self::SSO_SESSION];
+        } else {
+            return '';
+        }
+    }
+
+    public function retrieveRegularToken()
+    {
+        return isset($_SESSION[self::SSO_SESSION]) ? $_SESSION[self::SSO_SESSION] : '';
+    }
+
+    public function retrieveImpersonateToken()
+    {
+        return isset($_SESSION[self::SSO_SESSION_IMPERSONATE]) ? $_SESSION[self::SSO_SESSION_IMPERSONATE] : '';
+    }
+
+    /**
+     * Save Token to Session
+     *
+     * @return void
+     */
+    public function saveToken($credentials)
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(); 
+        }
+
+        $decoded_access_token = (new AccessToken($credentials))->parseAccessToken();
+        if (isset($decoded_access_token['impersonator'])) {
+            $_SESSION[self::SSO_SESSION_IMPERSONATE] = $credentials;
+        } else {
+            $previous_credentials = $this->retrieveRegularToken();
+            // Forget impersonate token session
+            // Just in case if impersonate user session revoked even session are not expired
+            // Example: impersonate user session revoked from Keycloak Administration console.
+            if (!is_null($previous_credentials)) {
+                $this->forgetImpersonateToken();
+            }
+            $_SESSION[self::SSO_SESSION] = $credentials;
+        }
+    }
+
+    /**
+     * Remove Token from Session
+     *
+     * @return void
+     */
+    public function forgetToken()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(); 
+        }
+
+        // Remove all session variables.
+        if (isset($_SESSION[self::SSO_SESSION_IMPERSONATE])) {
+            unset($_SESSION[self::SSO_SESSION_IMPERSONATE]);
+        } else {
+            unset($_SESSION[self::SSO_SESSION]);
+        }
+        
+        // Destroy the session
+        session_destroy();
+    }
+
+     /**
+     * Remove Impersonate Token from Session
+     *
+     * @return void
+     */
+    public function forgetImpersonateToken()
+    {
+        unset($_SESSION[self::SSO_SESSION_IMPERSONATE]);
+    }
+
+    /**
+     * Validate State from Session
+     *
+     * @return void
+     */
+    public function validateState($state)
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(); 
+        }
+        $challenge = $_SESSION[self::SSO_SESSION_STATE];
+        return (! empty($state) && ! empty($challenge) && $challenge === $state);
+    }
+
+    /**
+     * Save State to Session
+     *
+     * @return void
+     */
+    public function saveState()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(); 
+        }
+        $_SESSION[self::SSO_SESSION_STATE] = $this->state;
+    }
+
+    /**
+     * Remove State from Session
+     *
+     * @return void
+     */
+    public function forgetState()
+    {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start(); 
+        }
+
+        // Remove all session variables.
+        session_unset();
+        
+        // Destroy the session
+        session_destroy();
     }
 
     /**
@@ -141,7 +313,7 @@ class SSOService
             'scope' => 'openid',
             'response_type' => 'code',
             'client_id' => $this->getClientId(),
-            'redirect_uri' => $this->callbackUrl,
+            'redirect_uri' => $this->getCallbackUrl(),
             'state' => $this->getState(),
         ];
 
@@ -153,10 +325,31 @@ class SSOService
      *
      * @return string
      */
-    public function getLogoutUrl($id_token = null)
+    public function getLogoutUrl()
+    {
+        $token = $this->retrieveToken();
+
+        $decoded_access_token = (new AccessToken($token))->parseAccessToken();
+        
+        if (isset($decoded_access_token['impersonator'])) {
+            $this->invalidateRefreshToken($token['refresh_token']);
+            $this->forgetImpersonateToken();
+            return $this->getRedirectUrl();
+        } else {
+            $this->forgetToken();
+            return $this->logout($token['id_token']);
+        }
+    }
+
+    /**
+     * Logout user based on id_token
+     * 
+     * @return string
+     */
+    public function logout($id_token = null)
     {
         $url = (new OpenIDConfig)->get('end_session_endpoint');
-        
+
         $params = [
             'client_id' => $this->getClientId(),
         ];
@@ -182,11 +375,11 @@ class SSOService
             'code' => $code,
             'client_id' => $this->getClientId(),
             'grant_type' => 'authorization_code',
-            'redirect_uri' => $this->callbackUrl,
+            'redirect_uri' => $this->getCallbackUrl(),
         ];
 
-        if (! empty($this->clientSecret)) {
-            $params['client_secret'] = $this->clientSecret;
+        if (! empty($this->getClientSecret())) {
+            $params['client_secret'] = $this->getClientSecret();
         }
 
         $token = [];
@@ -222,11 +415,11 @@ class SSOService
             'client_id' => $this->getClientId(),
             'grant_type' => 'refresh_token',
             'refresh_token' => $credentials['refresh_token'],
-            'redirect_uri' => $this->callbackUrl,
+            'redirect_uri' => $this->getCallbackUrl(),
         ];
 
-        if (! empty($this->clientSecret)) {
-            $params['client_secret'] = $this->clientSecret;
+        if (! empty($this->getClientSecret())) {
+            $params['client_secret'] = $this->getClientSecret();
         }
 
         $token = [];
@@ -259,8 +452,8 @@ class SSOService
             'refresh_token' => $refreshToken,
         ];
 
-        if (! empty($this->clientSecret)) {
-            $params['client_secret'] = $this->clientSecret;
+        if (! empty($this->getClientSecret())) {
+            $params['client_secret'] = $this->getClientSecret();
         }
 
         try {
@@ -332,105 +525,6 @@ class SSOService
     }
 
     /**
-     * Retrieve Token from Session
-     *
-     * @return array|null
-     */
-    public function retrieveToken()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
-        }
-
-        return isset($_SESSION[self::SSO_SESSION]) ? $_SESSION[self::SSO_SESSION] : '';
-    }
-
-    /**
-     * Save Token to Session
-     *
-     * @return void
-     */
-    public function saveToken($credentials)
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
-        }
-        $_SESSION[self::SSO_SESSION] = $credentials;
-    }
-
-    /**
-     * Remove Token from Session
-     *
-     * @return void
-     */
-    public function forgetToken()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
-        }
-
-        // Remove all session variables.
-        session_unset();
-        
-        // Destroy the session
-        session_destroy();
-        
-        // session()->forget(self::SSO_SESSION);
-        // session()->save();
-    }
-
-    /**
-     * Validate State from Session
-     *
-     * @return void
-     */
-    public function validateState($state)
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
-        }
-        $challenge = $_SESSION[self::SSO_SESSION_STATE];
-        return (! empty($state) && ! empty($challenge) && $challenge === $state);
-    }
-
-    /**
-     * Save State to Session
-     *
-     * @return void
-     */
-    public function saveState()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
-        }
-        $_SESSION[self::SSO_SESSION_STATE] = $this->state;
-        
-        // session()->put(self::SSO_SESSION_STATE, $this->state);
-        // session()->save();
-    }
-
-    /**
-     * Remove State from Session
-     *
-     * @return void
-     */
-    public function forgetState()
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
-        }
-
-        // Remove all session variables.
-        session_unset();
-        
-        // Destroy the session
-        session_destroy();
-
-        // session()->forget(self::SSO_SESSION_STATE);
-        // session()->save();
-    }
-
-    /**
      * Check we need to refresh token and refresh if needed
      *
      * @param  array $credentials
@@ -456,6 +550,68 @@ class SSOService
 
         $this->saveToken($credentials);
         return $credentials;
+    }
+
+    /**
+     * Get credentials (access_token, refresh_token, id_token) of impersonate user.
+     * 
+     * Notes: 
+     * 1. Enable feature Token Exchange, Fine-Grained Admin Permissions, and Account Management REST API in Keycloak.
+     * 2. Register user(s) as impersonator in impersonate scope user permissions.
+     * 
+     * @param credentials (access token of impersonator), username
+     * @return array|exception
+     */
+    public function impersonateRequest($credentials = array(), $username)
+    {
+        $token = [];
+        
+        try {
+            $credentials = $this->refreshTokenIfNeeded($credentials);
+            
+            $url = (new OpenIDConfig)->get('token_endpoint');
+            
+            $headers = [
+                'Content-Type' => 'application/x-www-form-urlencoded',
+            ];
+            
+            $form_params = [
+                'client_id' => $this->getClientId(),
+                'grant_type' => 'urn:ietf:params:oauth:grant-type:token-exchange',
+                'requested_token_type' => 'urn:ietf:params:oauth:token-type:refresh_token',
+                'requested_subject' => $username,
+                'subject_token' => (new AccessToken($credentials))->getAccessToken(),
+                // Set scope value to openid to get id_token
+                'scope' => 'openid',
+            ];
+
+            if (!empty($this->getClientSecret())) {
+                $form_params['client_secret'] = $this->getClientSecret();
+            }
+            
+            $response = (new \GuzzleHttp\Client())->request('POST', $url, ['headers' => $headers, 'form_params' => $form_params]);
+            
+            if ($response->getStatusCode() !== 200) {
+                throw new Exception('User not allowed to impersonate');
+            }
+
+            $response_body = $response->getBody()->getContents();
+            $token = json_decode($response_body, true);
+        } catch (GuzzleException $e) {
+            log_exception($e);
+        } catch (Exception $e) {
+            return '[Keycloak Service] ' . print_r($e->getMessage(), true);
+        }
+
+        // Revoke previous impersonate user session if $token is not empty
+        if (!empty($token)) {
+            $impersonate_user_token = $this->retrieveImpersonateToken();
+            if (!empty($impersonate_user_token)) {
+                $this->invalidateRefreshToken($impersonate_user_token['refresh_token']);
+            }
+        }
+
+        return $token;
     }
 
     /**
