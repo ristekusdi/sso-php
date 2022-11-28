@@ -3,7 +3,6 @@
 namespace RistekUSDI\SSO\PHP\Models;
 
 use Illuminate\Contracts\Auth\Authenticatable;
-use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard;
 
 class User implements Authenticatable
 {
@@ -12,21 +11,7 @@ class User implements Authenticatable
      *
      * @var array
      */
-    protected $fillable = [
-        'name',
-        'email',
-        'sub',
-        'preferred_username',
-        'given_name',
-        'family_name',
-        'client_roles',
-        'unud_identifier_id',
-        'unud_user_type_id',
-        'unud_sso_id',
-        'picture',
-        'address',
-        'phone_number'
-    ];
+    protected $fillable;
 
     /**
      * User attributes
@@ -43,9 +28,7 @@ class User implements Authenticatable
     public function __construct(array $profile)
     {
         foreach ($profile as $key => $value) {
-            if (in_array($key, $this->fillable)) {
-                $this->attributes[ $key ] = $value;
-            }
+            $this->attributes[$key] = $value;
             $this->attributes['username'] = $profile['preferred_username'];
             $this->attributes['identity'] = $profile['given_name'];
             $this->attributes['full_identity'] = $profile['name'];
@@ -92,7 +75,7 @@ class User implements Authenticatable
      */
     public function getAuthIdentifier()
     {
-        return $this->email;
+        return $this->preferred_username;
     }
 
     /**
