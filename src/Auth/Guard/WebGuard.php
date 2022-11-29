@@ -56,7 +56,7 @@ class WebGuard implements Guard
          * If user doesn't have access to certain client app then throw exception
          */
         $access_token = $token->parseAccessToken();
-        if (!in_array($_SERVER['SSO_CLIENT_ID'], array_keys($access_token['resource_access']))) {
+        if (!in_array($_SERVER['KEYCLOAK_CLIENT_ID'], array_keys($access_token['resource_access']))) {
             throw new \Exception('Unauthorized', 403);
         }
 
@@ -93,7 +93,7 @@ class WebGuard implements Guard
 
         // Get client roles
         $roles = ['roles' => []];
-        $roles = (new AccessToken($credentials))->parseAccessToken()['resource_access'][$_SERVER['SSO_CLIENT_ID']];
+        $roles = (new AccessToken($credentials))->parseAccessToken()['resource_access'][$_SERVER['KEYCLOAK_CLIENT_ID']];
         
         $user = array_merge($user, ['client_roles' => $roles['roles']]);
 

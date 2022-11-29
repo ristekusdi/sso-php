@@ -35,15 +35,15 @@ class OpenIDConfig
     public function __construct()
     {
         if (is_null($this->baseUrl)) {
-            $this->baseUrl = trim($_SERVER['SSO_BASE_URL'], '/');
+            $this->baseUrl = trim($_SERVER['KEYCLOAK_BASE_URL'], '/');
         }
 
         if (is_null($this->realm)) {
-            $this->realm = $_SERVER['SSO_REALM'];
+            $this->realm = $_SERVER['KEYCLOAK_REALM'];
         }
 
         if (is_null($this->cacheOpenid)) {
-            $this->cacheOpenid = isset($_SERVER['SSO_CACHE_OPENID']) ? $_SERVER['SSO_CACHE_OPENID'] : false;
+            $this->cacheOpenid = isset($_SERVER['KEYCLOAK_CACHE_OPENID']) ? $_SERVER['KEYCLOAK_CACHE_OPENID'] : false;
         }
     }
 
