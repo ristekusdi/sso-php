@@ -86,31 +86,31 @@ class SSOService
     public function __construct()
     {
         if (is_null($this->baseUrl)) {
-            $this->baseUrl = trim($_SERVER['SSO_BASE_URL'], '/');
+            $this->baseUrl = trim($_SERVER['KEYCLOAK_BASE_URL'], '/');
         }
 
         if (is_null($this->realm)) {
-            $this->realm = $_SERVER['SSO_REALM'];
+            $this->realm = $_SERVER['KEYCLOAK_REALM'];
         }
 
         if (is_null($this->clientId)) {
-            $this->clientId = $_SERVER['SSO_CLIENT_ID'];
+            $this->clientId = $_SERVER['KEYCLOAK_CLIENT_ID'];
         }
 
         if (is_null($this->clientSecret)) {
-            $this->clientSecret = $_SERVER['SSO_CLIENT_SECRET'];
+            $this->clientSecret = $_SERVER['KEYCLOAK_CLIENT_SECRET'];
         }
 
         if (is_null($this->cacheOpenid)) {
-            $this->cacheOpenid = isset($_SERVER['SSO_CACHE_OPENID']) ? $_SERVER['SSO_CACHE_OPENID'] : false;
+            $this->cacheOpenid = isset($_SERVER['KEYCLOAK_CACHE_OPENID']) ? $_SERVER['KEYCLOAK_CACHE_OPENID'] : false;
         }
 
         if (is_null($this->callbackUrl)) {
-            $this->callbackUrl = $_SERVER['SSO_CALLBACK'];
+            $this->callbackUrl = $_SERVER['KEYCLOAK_CALLBACK'];
         }
 
         if (is_null($this->redirectUrl)) {
-            $this->redirectUrl = $_SERVER['SSO_REDIRECT_URL'];
+            $this->redirectUrl = $_SERVER['KEYCLOAK_REDIRECT_URL'];
         }
 
         $this->state = generate_random_state();
