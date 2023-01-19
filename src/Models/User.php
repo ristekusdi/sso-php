@@ -55,7 +55,7 @@ class User implements Authenticatable
      */
     public function getKey()
     {
-        return $this->preferred_username;
+        return isset($this->unud_sso_id) ? $this->unud_sso_id : $this->sub;
     }
 
     /**
@@ -65,7 +65,7 @@ class User implements Authenticatable
      */
     public function getAuthIdentifierName()
     {
-        return 'preferred_username';
+        return 'id';
     }
 
     /**
@@ -75,7 +75,7 @@ class User implements Authenticatable
      */
     public function getAuthIdentifier()
     {
-        return $this->preferred_username;
+        return $this->id;
     }
 
     /**
