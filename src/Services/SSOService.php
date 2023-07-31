@@ -586,7 +586,7 @@ class SSOService
             $response = (new \GuzzleHttp\Client())->request('POST', $url, ['headers' => $headers, 'form_params' => $form_params]);
             
             if ($response->getStatusCode() !== 200) {
-                throw new Exception('User not allowed to impersonate');
+                throw new Exception('User not allowed to impersonate', 403);
             }
 
             $response_body = $response->getBody()->getContents();
