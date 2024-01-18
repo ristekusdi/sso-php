@@ -11,12 +11,12 @@
         ]
     },
     "require": {
-        "php": "^7.2",
-        "illuminate/contracts": "^7.0",
-        "guzzlehttp/guzzle": "^7.4.5",
+        "php": "^7.4",
+        "illuminate/contracts": "^8.0",
+        "guzzlehttp/guzzle": "^7.8",
         "vlucas/phpdotenv": "^5.4",
         "symfony/console": "^5.4",
-        "illuminate/filesystem": "^7.30"
+        "illuminate/filesystem": "^8.0"
     },
     "bin": [
         "bin/sso"
@@ -27,5 +27,7 @@
             "name": "Riset dan Teknologi USDI",
             "email": "usdi@unud.ac.id"
         }
-    ]
+    ],
+    "minimum-stability": "stable",
+    "prefer-stable": true
 }
