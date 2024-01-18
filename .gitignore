@@ -1,7 +1,2 @@
 vendor
 composer.lock
-
-# ignore doc-site branch asset
-node_modules
-build_local
-source
