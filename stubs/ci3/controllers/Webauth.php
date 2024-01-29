@@ -54,28 +54,38 @@ class Webauth extends CI_Controller {
             try {
                 (new WebGuard())->validate($token);
 
-                $roles = (new WebGuard)->user()->client_roles;
+                $client_roles = (new WebGuard)->user()->client_roles;
 
-                $role_active = $roles[0];
+                // NOTE: You maybe want to get roles from your database by client_roles name
+                // Alongside with permissions related with each role.
+                // Here's is example of result.
+                $roles = [
+                    [
+                        'role_id' => 1,
+                        'role_name' => 'Operator',
+                        'permissions' => [
+                            'ViewUsers',
+                            'ViewUser',
+                            'CreateUser',
+                            'EditUser',
+                            'DeleteUser',
+                        ]
+                    ],
+                    [
+                        'role_id' => 2,
+                        'role_name' => 'User',
+                        'permissions' => [
+                            'ViewProfile',
+                            'EditProfile',
+                        ]
+                    ],
+                ];
 
-                // TODO: Add permissions from role active.
-                // You can get permissions from database maybe.
-                // Return data in array
-                $raw_role_permissions = [];
-
-                $role_permissions = [];
-                foreach ($raw_role_permissions as $raw_perm) {
-                    $role_permissions[] = $raw_perm['perm_desc'];
-                }
-
-                // TODO: Maybe you want to add menus.
-                $arr_menu = [];
+                $active_role = $roles[0];
                 
                 $serialize_session = serialize(array(
                     'roles' => $roles,
-                    'role_active' => $role_active,
-                    'role_permissions' => $role_permissions,
-                    'arr_menu' => $arr_menu
+                    'active_role' => $active_role,
                 ));
 
                 // PHP_SESSION_NONE if sessions are enabled, but none exists.
@@ -96,41 +106,29 @@ class Webauth extends CI_Controller {
     /**
      * Change role active and get permissions changed role active
      */
-    public function change_role_active()
+    public function change_active_role()
     { 
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
 
-        $role_active = $this->input->post('role_active');
+        $active_role = $this->input->post('active_role');
         $unserialize_session = unserialize($_SESSION['serialize_session']);
-        $unserialize_session['role_active'] = $role_active;
-
-        // Role Permissions
-        $raw_role_permissions = [];
-
-        $role_permissions = [];
-        foreach ($raw_role_permissions as $raw_perm) {
-            $role_permissions[] = $raw_perm['perm_desc'];
-        }
-
-        $unserialize_session['role_permissions'] = $role_permissions;
+        $unserialize_session['active_role'] = $active_role;
 
         $serialize_session = serialize($unserialize_session);
         $_SESSION['serialize_session'] = $serialize_session;
 
-        $arr = array(
-            'submit' => '1',
-            'link' => base_url('home')
-        );
-
+        http_response_code(200);
         header('Content-Type: application/json');
-        echo json_encode($arr);
+        echo json_encode([
+            'link' => base_url('home')
+        ]);
     }
 
     /**
-     * Change key value (kv) active
+     * Change active kv (key value)
      */
-    public function change_kv_active()
+    public function change_active_kv()
     { 
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
@@ -142,12 +140,10 @@ class Webauth extends CI_Controller {
         $serialize_session = serialize($unserialize_session);
         $_SESSION['serialize_session'] = $serialize_session;
 
-        $arr = array(
-            'submit' => '1',
-            'link' => ""
-        );
-
+        http_response_code(200);
         header('Content-Type: application/json');
-        echo json_encode($arr);
+        echo json_encode([
+            'link' => ''
+        ]);
     }
 }
