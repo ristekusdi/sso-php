@@ -38,7 +38,7 @@ class Webguard {
     {
         $unserialize_session = unserialize($_SESSION['serialize_session']);
         $this->user->roles = $unserialize_session['roles'];
-        $this->user->active_role = $unserialize_session['active_role'];
+        $this->user->role = $unserialize_session['role'];
         return $this;
     }
 
@@ -47,16 +47,48 @@ class Webguard {
         return $this->user;
     }
     
-    public function hasRole($roles)
+    /**
+     * Check if user has specific role
+     * @return boolean
+     */
+    public function hasRole($role)
     {
-        $result = empty(array_diff((array) $roles, $this->user()->get()->roles));        
+        $result = false;
+        $roles_attr = $this->user->roles;
+        $role_names = array_column($roles_attr, 'name');
+        if (is_array($role)) {
+            $roles = $role;
+            $result = !empty(array_intersect($role_names , (array) $roles));
+        } else {
+            $result = in_array($role, $role_names) ? true : false;
+        }
+
         $this->user->hasRole = $result;
         return $this->user->hasRole;
     }
 
-    public function hasPermission($permissions)
+    /**
+     * Check if user has permission(s) from specific role
+     * @return boolean
+     */
+    public function hasPermission($permission)
     {
-        $result = !empty(array_intersect((array) $permissions, $this->user->role_permissions));
+        $result = false;
+        $role_permissions = [];
+        if (isset($this->user->role->permissions)) {
+            foreach ($this->user->role->permissions as $perm) {
+                array_push($role_permissions, $perm);
+            }
+        }
+        
+        if (is_array($permission)) {
+            $permissions = $permission;
+
+            $result = !empty(array_intersect((array) $role_permissions, (array) $permissions));
+        } else {
+            $result = in_array($permission, $role_permissions) ? true : false;
+        }
+
         $this->user->hasPermission = $result;
         return $this->user->hasPermission;
     }

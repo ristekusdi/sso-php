@@ -56,36 +56,31 @@ class Webauth extends CI_Controller {
 
                 $client_roles = (new WebGuard)->user()->client_roles;
 
-                // NOTE: You maybe want to get roles from your database by client_roles name
-                // Alongside with permissions related with each role.
+                // NOTE: You maybe want to get roles from your database by using $client_roles
+                // and put permissions to each role.
                 // Here's is example of result.
-                $roles = [
+                $roles = json_decode(json_encode([
                     [
-                        'role_id' => 1,
-                        'role_name' => 'Operator',
+                        'id' => 1,
+                        'name' => 'Operator',
                         'permissions' => [
-                            'ViewUsers',
-                            'ViewUser',
-                            'CreateUser',
-                            'EditUser',
-                            'DeleteUser',
+                            'user:view',
+                            'user:edit',
                         ]
                     ],
                     [
-                        'role_id' => 2,
-                        'role_name' => 'User',
+                        'id' => 2,
+                        'name' => 'User',
                         'permissions' => [
-                            'ViewProfile',
-                            'EditProfile',
+                            'profile:view',
+                            'profile:edit',
                         ]
                     ],
-                ];
-
-                $active_role = $roles[0];
+                ]));
                 
                 $serialize_session = serialize(array(
                     'roles' => $roles,
-                    'active_role' => $active_role,
+                    'role' => $roles[0],
                 ));
 
                 // PHP_SESSION_NONE if sessions are enabled, but none exists.
@@ -104,16 +99,16 @@ class Webauth extends CI_Controller {
     }
 
     /**
-     * Change role active and get permissions changed role active
+     * Change current role
      */
-    public function change_active_role()
+    public function change_current_role()
     { 
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
 
-        $active_role = $this->input->post('active_role');
+        $role = $this->input->post('role');
         $unserialize_session = unserialize($_SESSION['serialize_session']);
-        $unserialize_session['active_role'] = $active_role;
+        $unserialize_session['role'] = $role;
 
         $serialize_session = serialize($unserialize_session);
         $_SESSION['serialize_session'] = $serialize_session;
@@ -126,9 +121,9 @@ class Webauth extends CI_Controller {
     }
 
     /**
-     * Change active kv (key value)
+     * Change kv (key value)
      */
-    public function change_active_kv()
+    public function change_kv()
     { 
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
