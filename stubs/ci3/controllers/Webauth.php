@@ -101,7 +101,7 @@ class Webauth extends CI_Controller {
     /**
      * Change current role
      */
-    public function change_current_role()
+    public function change_role()
     { 
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
@@ -113,7 +113,7 @@ class Webauth extends CI_Controller {
         $serialize_session = serialize($unserialize_session);
         $_SESSION['serialize_session'] = $serialize_session;
 
-        http_response_code(200);
+        http_response_code(204);
         header('Content-Type: application/json');
         echo json_encode([
             'link' => base_url('home')
@@ -135,7 +135,7 @@ class Webauth extends CI_Controller {
         $serialize_session = serialize($unserialize_session);
         $_SESSION['serialize_session'] = $serialize_session;
 
-        http_response_code(200);
+        http_response_code(204);
         header('Content-Type: application/json');
         echo json_encode([
             'link' => ''
