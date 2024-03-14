@@ -101,7 +101,7 @@ class Webauth extends CI_Controller {
     /**
      * Change current role
      */
-    public function change_role()
+    public function changeRole()
     { 
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
@@ -123,7 +123,7 @@ class Webauth extends CI_Controller {
     /**
      * Change kv (key value)
      */
-    public function change_kv()
+    public function changeKeyValue()
     { 
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
