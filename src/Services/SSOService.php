@@ -556,7 +556,7 @@ class SSOService
      * @param credentials (access token of impersonator), username
      * @return array|exception
      */
-    public function impersonateRequest($credentials = array(), $username)
+    public function impersonate($credentials = array(), $username)
     {
         $token = [];
         
