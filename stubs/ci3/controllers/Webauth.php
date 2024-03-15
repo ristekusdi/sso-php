@@ -146,9 +146,6 @@ class Webauth extends CI_Controller {
 
         http_response_code(204);
         header('Content-Type: application/json');
-        echo json_encode([
-            'link' => base_url('home')
-        ]);
     }
 
     /**
@@ -168,8 +165,5 @@ class Webauth extends CI_Controller {
 
         http_response_code(204);
         header('Content-Type: application/json');
-        echo json_encode([
-            'link' => ''
-        ]);
     }
 }
