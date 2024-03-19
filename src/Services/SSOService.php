@@ -235,7 +235,7 @@ class SSOService
 
         // Remove all session variables.
         if (isset($_SESSION[self::SSO_SESSION_IMPERSONATE])) {
-            unset($_SESSION[self::SSO_SESSION_IMPERSONATE]);
+            $this->forgetImpersonateToken();
         } else {
             unset($_SESSION[self::SSO_SESSION]);
         }
@@ -331,35 +331,25 @@ class SSOService
 
         $decoded_access_token = (new AccessToken($token))->parseAccessToken();
         
+        $this->invalidateRefreshToken($token['refresh_token']);
+
         if (isset($decoded_access_token['impersonator'])) {
-            $this->invalidateRefreshToken($token['refresh_token']);
-            $this->forgetImpersonateToken();
             return $this->getRedirectUrl();
         } else {
-            $this->forgetToken();
-            return $this->logout($token['id_token']);
+            $id_token = isset($token['id_token']) ? $token['id_token'] : null;
+            
+            $url = (new OpenIDConfig)->get('end_session_endpoint');
+            $params = [
+                'client_id' => $this->getClientId(),
+            ];
+
+            if ($id_token !== null) {
+                $params['id_token_hint'] = $id_token;
+                $params['post_logout_redirect_uri'] = url('/');
+            }
+
+            return build_url($url, $params);
         }
-    }
-
-    /**
-     * Logout user based on id_token
-     * 
-     * @return string
-     */
-    public function logout($id_token = null)
-    {
-        $url = (new OpenIDConfig)->get('end_session_endpoint');
-
-        $params = [
-            'client_id' => $this->getClientId(),
-        ];
-
-        if ($id_token !== null) {
-            $params['id_token_hint'] = $id_token;
-            $params['post_logout_redirect_uri'] = url('/');
-        }
-
-        return build_url($url, $params);
     }
 
     /**
@@ -442,7 +432,7 @@ class SSOService
      * Invalidate Refresh
      *
      * @param  string $refreshToken
-     * @return array
+     * @return void
      */
     public function invalidateRefreshToken($refreshToken)
     {
@@ -457,13 +447,10 @@ class SSOService
         }
 
         try {
-            $response = (new \GuzzleHttp\Client())->request('POST', $url, ['form_params' => $params]);
-            return $response->getStatusCode() === 204;
+            (new \GuzzleHttp\Client())->request('POST', $url, ['form_params' => $params]);
         } catch (GuzzleException $e) {
             log_exception($e);
         }
-
-        return false;
     }
 
     /**
