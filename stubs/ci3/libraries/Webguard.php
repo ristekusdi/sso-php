@@ -92,4 +92,33 @@ class Webguard {
         $this->user->hasPermission = $result;
         return $this->user->hasPermission;
     }
+
+    public function restrictAjax()
+    {
+        if (!$this->is_logged_in()) {
+            $response['submit'] = 403;
+            $response['error'] = 'Your session has been expired, please login again';
+            header('Content-Type: application/json; charset=utf-8');
+            http_response_code(403);
+            echo json_encode($response);
+            exit();
+        }
+        return TRUE;
+    }
+
+    public function restrictAjaxDatatable()
+    {
+        if (! $this->check()) {
+            $response = '{
+                "iTotalRecords": 0,
+                "iTotalDisplayRecords": 0,
+                "aaData": [],
+                "submit":403,
+                "error":"Your session has been expired, please login again"
+            }';
+            echo $response;
+            exit();
+        }
+        return true;
+    }
 }
