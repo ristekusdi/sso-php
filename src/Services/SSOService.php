@@ -173,10 +173,6 @@ class SSOService
      */
     public function retrieveToken()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
-        }
-
         if (isset($_SESSION[self::SSO_SESSION_IMPERSONATE])) {
             return $_SESSION[self::SSO_SESSION_IMPERSONATE];
         } else if (isset($_SESSION[self::SSO_SESSION])) {
@@ -204,7 +200,7 @@ class SSOService
     public function saveToken($credentials)
     {
         if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
+            throw new Exception("Cannot save token. Please start session!", 500);
         }
 
         $decoded_access_token = (new AccessToken($credentials))->parseAccessToken();
@@ -229,19 +225,17 @@ class SSOService
      */
     public function forgetToken()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
-        }
-
         // Remove all session variables.
         if (isset($_SESSION[self::SSO_SESSION_IMPERSONATE])) {
             $this->forgetImpersonateToken();
-        } else {
+        } else if (isset($_SESSION[self::SSO_SESSION]))  {
             unset($_SESSION[self::SSO_SESSION]);
         }
         
         // Destroy the session
-        session_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_destroy();
+        }
     }
 
      /**
@@ -262,8 +256,9 @@ class SSOService
     public function validateState($state)
     {
         if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
+            throw new Exception("Cannot validate state. Please start session!", 500);
         }
+
         $challenge = $_SESSION[self::SSO_SESSION_STATE];
         return (! empty($state) && ! empty($challenge) && $challenge === $state);
     }
@@ -276,8 +271,9 @@ class SSOService
     public function saveState()
     {
         if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
+            throw new Exception("Cannot save state. Please start session!", 500);
         }
+
         $_SESSION[self::SSO_SESSION_STATE] = $this->state;
     }
 
@@ -288,15 +284,13 @@ class SSOService
      */
     public function forgetState()
     {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start(); 
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            // Remove all session variables.
+            session_unset();
+            
+            // Destroy the session
+            session_destroy();
         }
-
-        // Remove all session variables.
-        session_unset();
-        
-        // Destroy the session
-        session_destroy();
     }
 
     /**
