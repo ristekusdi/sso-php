@@ -1,16 +1,18 @@
 <?php
 
-use RistekUSDI\SSO\PHP\Exceptions\CallbackException;
 use RistekUSDI\SSO\PHP\Services\SSOService;
 use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard as Guard;
-use RistekUSDI\SSO\PHP\Auth\AccessToken;
 
 class Webguard {
 
     private $user;
+    private $ci;
 
     public function __construct()
     {
+        $ci =& get_instance();
+        $this->ci = $ci;
+        $this->ci->load->library('session');
         $this->user = (new Guard)->user();
     }
 
@@ -26,7 +28,13 @@ class Webguard {
 
     public function check()
     {
-        return (new Guard())->check();
+        $credentials = (new SSOService())->retrieveToken();
+        if ($credentials) {
+            $user = (new SSOService)->getUserProfile($credentials);
+            return $user ? true : false;
+        } else {
+            return false;
+        }
     }
 
     public function guest()
@@ -48,55 +56,23 @@ class Webguard {
         return $this->user;
     }
     
-    /**
-     * Check if user has specific role
-     * @return boolean
-     */
-    public function hasRole($role)
+    public function hasRole($roles)
     {
-        $result = false;
-        $roles_attr = $this->user->roles;
-        $role_names = array_column($roles_attr, 'name');
-        if (is_array($role)) {
-            $roles = $role;
-            $result = !empty(array_intersect($role_names , (array) $roles));
-        } else {
-            $result = in_array($role, $role_names) ? true : false;
-        }
-
+        $result = empty(array_diff((array) $roles, $this->user()->get()->roles));        
         $this->user->hasRole = $result;
         return $this->user->hasRole;
     }
 
-    /**
-     * Check if user has permission(s) from specific role
-     * @return boolean
-     */
-    public function hasPermission($permission)
+    public function hasPermission($permissions)
     {
-        $result = false;
-        $role_permissions = [];
-        if (isset($this->user->role->permissions)) {
-            foreach ($this->user->role->permissions as $perm) {
-                array_push($role_permissions, $perm);
-            }
-        }
-        
-        if (is_array($permission)) {
-            $permissions = $permission;
-
-            $result = !empty(array_intersect((array) $role_permissions, (array) $permissions));
-        } else {
-            $result = in_array($permission, $role_permissions) ? true : false;
-        }
-
+        $result = !empty(array_intersect((array) $permissions, $this->user->role->permissions));
         $this->user->hasPermission = $result;
         return $this->user->hasPermission;
     }
-
-    public function restrictAjax()
+    
+    public function restrictAjaxLogin()
     {
-        if (!$this->is_logged_in()) {
+        if (!$this->check()) {
             $response['submit'] = 403;
             $response['error'] = 'Your session has been expired, please login again';
             header('Content-Type: application/json; charset=utf-8');
