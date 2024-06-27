@@ -4,15 +4,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 use RistekUSDI\SSO\PHP\Exceptions\CallbackException;
 use RistekUSDI\SSO\PHP\Services\SSOService;
 use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard;
-use RistekUSDI\SSO\PHP\Auth\AccessToken;
 
 class Webauth extends CI_Controller {
 
     public function __construct()
     {
         parent::__construct();
-        $this->CI =& get_instance();
         $this->load->helper('url');
+        $this->load->library('session');
     }
 
     public function login()
@@ -60,7 +59,7 @@ class Webauth extends CI_Controller {
                 // You may need to create a custom session for your internal app
                 $this->createSession();
 
-                redirect('/home');
+                redirect('home', 'location', 301);
             } catch (\Exception $e) {
                 throw new CallbackException($e->getCode(), $e->getMessage());
             }
@@ -82,7 +81,7 @@ class Webauth extends CI_Controller {
 
             $this->createSession();
 
-            redirect('/home');
+            redirect('home', 'location', 301);
         } catch (\Throwable $th) {
             echo "Status code: {$th->getCode()} \n";
             echo "Error message: {$th->getMessage()}\n";
@@ -90,43 +89,57 @@ class Webauth extends CI_Controller {
         }
     }
 
+    /**
+     * You may be create a session to get roles and permission that belongs to each role.
+     * After user logged in, they may have list of roles based on a client (app) that stored in client_roles property.
+     * Use "client_roles" property as parameter to get roles and permissions in your app database.
+     * Expected result is a serialize of array that store in a session called serialize session.
+     * The array contains:
+     * - roles (list of roles with permissions belongs to each role)
+     * - role (active or current role)
+     */
     private function createSession()
     {
         $client_roles = (new WebGuard)->user()->client_roles;
-        // NOTE: You maybe want to get roles from your database by using $client_roles
-        // and put permissions to each role.
-        // Here's is example of result.
-        $roles = json_decode(json_encode([
-            [
-                'id' => 1,
-                'name' => 'Operator',
-                'permissions' => [
-                    'user:view',
-                    'user:edit',
-                ]
-            ],
-            [
-                'id' => 2,
-                'name' => 'User',
-                'permissions' => [
-                    'profile:view',
-                    'profile:edit',
-                ]
-            ],
-        ]));
-        
-        $serialize_session = serialize(array(
-            'roles' => $roles,
-            'role' => $roles[0],
-        ));
 
-        // PHP_SESSION_NONE if sessions are enabled, but none exists.
-        // https://www.php.net/manual/en/function.session-status.php
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
+        $roles = $this->db->query("SELECT role_id AS id, role_name as `name` FROM rbac_roles
+        WHERE rbac_roles.role_name IN ?", array($client_roles))->result();
+
+        foreach ($roles as $key => $role) {
+            $role_permissions = $this->db->query("SELECT rbac_permissions.perm_desc 
+            FROM rbac_permissions
+            INNER JOIN rbac_role_perm ON rbac_role_perm.perm_id = rbac_permissions.perm_id
+            WHERE rbac_role_perm.`role_id` = ?", array($role->id))->result_array();
+
+            $roles[$key]->permissions = array_column($role_permissions, 'perm_desc');
         }
 
-        $_SESSION['serialize_session'] = $serialize_session;       
+        // NOTE: You maybe want to get roles from your database by using $client_roles
+        // and put permissions to each role.
+        // Here's is the expected result.
+        // $roles = json_decode(json_encode([
+        //     [
+        //         'id' => 1,
+        //         'name' => 'Operator',
+        //         'permissions' => [
+        //             'user:view',
+        //             'user:edit',
+        //         ]
+        //     ],
+        //     [
+        //         'id' => 2,
+        //         'name' => 'User',
+        //         'permissions' => [
+        //             'profile:view',
+        //             'profile:edit',
+        //         ]
+        //     ],
+        // ]));
+        
+        $_SESSION['serialize_session'] = serialize(array(
+            'roles' => $roles,
+            'role' => $roles[0], // This is a active or current role
+        ));       
     }
 
     /**
