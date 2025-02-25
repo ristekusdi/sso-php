@@ -47,6 +47,17 @@ class WebGuard implements Guard
             throw new \Exception('Credentials must have access_token and id_token!');
         }
 
+        // Validate token signature
+        if (!isset($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY']) || empty($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY'])) {
+            throw new \Exception('Please set KEYCLOAK_REALM_PUBLIC_KEY');
+        }
+
+        try {
+            (new AccessToken($credentials))->validateSignatureWithKey($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY']);
+        } catch (\Throwable $th) {
+            throw new \Exception($th->getMessage(), $th->getCode());
+        }
+
         $token = new AccessToken($credentials);
         if (empty($token->getAccessToken())) {
             throw new \Exception('Access Token is invalid.');
@@ -74,7 +85,7 @@ class WebGuard implements Guard
     /**
      * Try to authenticate the user
      *
-     * @throws CallbackException
+     * @throws Exception
      * @return null
      */
     public function authenticate()
@@ -94,10 +105,22 @@ class WebGuard implements Guard
                 return null;
             }
             (new SSOService)->forgetToken();
-            $updated_credentials = (new SSOService)->refreshAccessToken($credentials);
-            (new SSOService)->saveToken($updated_credentials);
-            $token = new AccessToken($updated_credentials);
+            $credentials = (new SSOService)->refreshAccessToken($credentials);
+            (new SSOService)->saveToken($credentials);
+            $token = new AccessToken($credentials);
             $user = $token->parseAccessToken();
+        }
+
+        if (!isset($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY']) || empty($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY'])) {
+            throw new \Exception('Please set KEYCLOAK_REALM_PUBLIC_KEY');
+        }
+
+        // We validate token signature here after new token is generated.
+        // We do this because the token stored in PHP session, the token may expired early before validate and we cannot take advantage of refresh token case.
+        try {
+            (new AccessToken($credentials))->validateSignatureWithKey($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY']);
+        } catch (\Throwable $th) {
+            throw new \Exception($th->getMessage(), $th->getCode());
         }
 
         // Get client roles
@@ -115,5 +138,19 @@ class WebGuard implements Guard
     {
         $this->user = $user;
         return $this;
+    }
+
+    /**
+     * Determine if the guard has a user instance.
+     *
+     * @return bool
+     */
+    public function hasUser()
+    {
+        if (!is_null($this->user) && $this->user instanceof \RistekUSDI\SSO\PHP\Models\User) {
+            return true;
+        }
+
+        return false;
     }
 }

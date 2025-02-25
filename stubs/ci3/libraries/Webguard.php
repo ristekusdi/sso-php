@@ -32,11 +32,7 @@ class Webguard {
      */
     public function check()
     {
-        if (!is_null($this->user) && $this->user instanceof \RistekUSDI\SSO\PHP\Models\User) {
-            return true;
-        }
-
-        return false;
+        return (new Guard())->hasUser();
     }
 
     public function guest()
