@@ -73,6 +73,19 @@ class AccessToken
     }
 
     /**
+     * Get expired date of RefreshToken in timestamp
+     * 
+     * @return int
+     */
+    public function getRefreshTokenExpiresAt()
+    {
+        $exp = $this->parseRefreshToken();
+        $exp = $exp['exp'] ?? '';
+
+        return (int) $exp;
+    }
+
+    /**
      * Get IdToken
      *
      * @return string
@@ -163,6 +176,16 @@ class AccessToken
     public function parseAccessToken()
     {
         return $this->parseToken($this->accessToken);
+    }
+
+    /**
+     * Parse the Refresh Token
+     *
+     * @return array
+     */
+    public function parseRefreshToken()
+    {
+        return $this->parseToken($this->refreshToken);
     }
 
     /**
