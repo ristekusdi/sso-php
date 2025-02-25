@@ -200,7 +200,7 @@ class SSOService
     public function saveToken($credentials)
     {
         if (session_status() === PHP_SESSION_NONE) {
-            throw new Exception("Cannot save token. Please start session!", 500);
+            session_start();
         }
 
         $decoded_access_token = (new AccessToken($credentials))->parseAccessToken();
@@ -256,7 +256,7 @@ class SSOService
     public function validateState($state)
     {
         if (session_status() === PHP_SESSION_NONE) {
-            throw new Exception("Cannot validate state. Please start session!", 500);
+            session_start();
         }
 
         $challenge = $_SESSION[self::SSO_SESSION_STATE];
@@ -271,7 +271,7 @@ class SSOService
     public function saveState()
     {
         if (session_status() === PHP_SESSION_NONE) {
-            throw new Exception("Cannot save state. Please start session!", 500);
+            session_start();
         }
 
         $_SESSION[self::SSO_SESSION_STATE] = $this->state;
@@ -385,7 +385,7 @@ class SSOService
     /**
      * Refresh access token
      *
-     * @param  string $refreshToken
+     * @param array $credentials
      * @return array
      */
     public function refreshAccessToken($credentials)
