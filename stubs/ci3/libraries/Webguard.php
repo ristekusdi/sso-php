@@ -1,6 +1,5 @@
 <?php
 
-use RistekUSDI\SSO\PHP\Services\SSOService;
 use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard as Guard;
 
 class Webguard {
@@ -12,7 +11,6 @@ class Webguard {
     {
         $ci =& get_instance();
         $this->ci = $ci;
-        $this->ci->load->library('session');
         $this->user = (new Guard)->user();
     }
 
@@ -26,15 +24,19 @@ class Webguard {
         }
     }
 
+    /**
+     * Allow user to access the resources
+     * As long as user is instance of \RistekUSDI\SSO\PHP\Models\User and is not null.
+     * 
+     * @return boolean
+     */
     public function check()
     {
-        $credentials = (new SSOService())->retrieveToken();
-        if ($credentials) {
-            $user = (new SSOService)->getUserProfile($credentials);
-            return $user ? true : false;
-        } else {
-            return false;
+        if (!is_null($this->user) && $this->user instanceof \RistekUSDI\SSO\PHP\Models\User) {
+            return true;
         }
+
+        return false;
     }
 
     public function guest()
@@ -44,6 +46,9 @@ class Webguard {
 
     public function user()
     {
+        if (!isset($_SESSION['serialize_session'])) {
+            $this->ci->websession->create((new Guard())->user());
+        }
         $unserialize_session = unserialize($_SESSION['serialize_session']);
         foreach ($unserialize_session as $key => $value) {
             $this->user->{$key} = $value;
