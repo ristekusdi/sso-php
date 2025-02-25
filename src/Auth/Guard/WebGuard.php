@@ -75,20 +75,29 @@ class WebGuard implements Guard
      * Try to authenticate the user
      *
      * @throws CallbackException
-     * @return boolean
+     * @return null
      */
     public function authenticate()
     {
         // Get Credentials
         $credentials = (new SSOService)->retrieveToken();
         if (empty($credentials)) {
-            return false;
+            return null;
         }
 
-        $user = (new SSOService)->getUserProfile($credentials);
-        if (empty($user)) {
+        $token = new AccessToken($credentials);
+        $user = $token->parseAccessToken();
+        
+        if ($token->hasExpired()) {
+            // NOTE: User needs to log in again in case refresh token has expired.
+            if (time() >= $token->getRefreshTokenExpiresAt()) {
+                return null;
+            }
             (new SSOService)->forgetToken();
-            return false;
+            $updated_credentials = (new SSOService)->refreshAccessToken($credentials);
+            (new SSOService)->saveToken($updated_credentials);
+            $token = new AccessToken($updated_credentials);
+            $user = $token->parseAccessToken();
         }
 
         // Get client roles
