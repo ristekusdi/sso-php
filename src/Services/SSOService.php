@@ -12,6 +12,9 @@ class SSOService
         saveToken as private traitSaveToken;
         retrieveToken as private traitRetrieveToken;
         forgetToken as private traitForgetToken;
+        validateState as private traitValidateState;
+        saveState as private traitSaveState;
+        forgetState as private traitForgetState;
     }
 
     /**
@@ -173,6 +176,21 @@ class SSOService
     public function forgetToken()
     {
         return $this->traitForgetToken();
+    }
+
+    public function validateState($state)
+    {
+        return $this->traitValidateState($state);
+    }
+
+    public function saveState()
+    {
+        return $this->traitSaveState();
+    }
+
+    public function fotgetState()
+    {
+        return $this->traitForgetState();
     }
 
     /**
