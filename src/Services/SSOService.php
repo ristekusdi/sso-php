@@ -11,17 +11,6 @@ class SSOService
     use SSOServiceTrait;
 
     /**
-     * The Session key for token
-     */
-    const SSO_SESSION = '_sso_token';
-    const SSO_SESSION_IMPERSONATE = '_sso_token_impersonate';
-
-    /**
-     * The Session key for state
-     */
-    const SSO_SESSION_STATE = '_sso_state';
-
-    /**
      * Keycloak URL
      *
      * @var string
