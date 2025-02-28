@@ -1,7 +1,5 @@
 <?php
 
-use GuzzleHttp\Exception\GuzzleException;
-
 /**
  * Return a random state parameter for authorization
  *

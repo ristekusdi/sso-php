@@ -69,7 +69,7 @@ class OpenIDConfig
         $response = (new \GuzzleHttp\Client())->request('GET', $url);
 
         if ($response->getStatusCode() !== 200) {
-            throw new Exception('[SSO Error] It was not possible to load OpenId configuration: ' . $response->getStatusCode());
+            throw new Exception('SSO Service error:It was not possible to load OpenId configuration: ' . $response->getStatusCode());
         }
 
         $configuration = json_decode($response->getBody()->getContents(), true);
