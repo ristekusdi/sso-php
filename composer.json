@@ -11,7 +11,7 @@
         ]
     },
     "require": {
-        "php": "^8.2",
+        "php": ">=8.2",
         "illuminate/contracts": "^11.0",
         "guzzlehttp/guzzle": "^7.9",
         "vlucas/phpdotenv": "^5.6",
