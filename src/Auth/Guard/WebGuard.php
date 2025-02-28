@@ -49,7 +49,7 @@ class WebGuard implements Guard
 
         // Validate token signature
         if (!isset($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY']) || empty($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY'])) {
-            throw new \Exception('Please set KEYCLOAK_REALM_PUBLIC_KEY');
+            throw new \Exception('Cannot validate token signature.');
         }
 
         try {
@@ -111,16 +111,18 @@ class WebGuard implements Guard
             $user = $token->parseAccessToken();
         }
 
-        if (!isset($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY']) || empty($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY'])) {
-            throw new \Exception('Please set KEYCLOAK_REALM_PUBLIC_KEY');
-        }
-
         // We validate token signature here after new token is generated.
         // We do this because the token stored in PHP session, the token may expired early before validate and we cannot take advantage of refresh token case.
+        if (!isset($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY']) || empty($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY'])) {
+            error_log('Cannot validate token signature.');
+            return null;
+        }
+
         try {
             (new AccessToken($credentials))->validateSignatureWithKey($_SERVER['KEYCLOAK_REALM_PUBLIC_KEY']);
         } catch (\Throwable $th) {
-            throw new \Exception($th->getMessage(), $th->getCode());
+            error_log($th->getMessage());
+            return null;
         }
 
         // Get client roles

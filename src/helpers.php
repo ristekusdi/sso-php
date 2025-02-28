@@ -14,30 +14,6 @@ if (!function_exists('generate_random_state')) {
     }
 }
 
-
-/**
- * Log a GuzzleException
- *
- * @param  GuzzleException $e
- * @return void
- */
-if (!function_exists('log_exception')) {
-    function log_exception(GuzzleException $e)
-    {
-        // Guzzle 7
-        if (! method_exists($e, 'getResponse') || empty($e->getResponse())) {
-            return '[Keycloak Service] ' . $e->getMessage();
-        }
-
-        $error = [
-            'request' => method_exists($e, 'getRequest') ? $e->getRequest() : '',
-            'response' => $e->getResponse()->getBody()->getContents(),
-        ];
-
-        return '[Keycloak Service] ' . print_r($error, true);
-    }
-}
-
 if (!function_exists('build_http_query')) {
     function build_http_query($array)
     {

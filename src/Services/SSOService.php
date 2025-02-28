@@ -375,8 +375,8 @@ class SSOService
                 $token = $response->getBody()->getContents();
                 $token = json_decode($token, true);
             }
-        } catch (GuzzleException $e) {
-            echo 'Message: '.$e->getMessage();
+        } catch (\Throwable $th) {
+            error_log("SSO Service error: {$th->getMessage()}");
         }
 
         return $token;
@@ -415,8 +415,8 @@ class SSOService
                 $token = $response->getBody()->getContents();
                 $token = json_decode($token, true);
             }
-        } catch (GuzzleException $e) {
-            log_exception($e);
+        } catch (\Throwable $th) {
+            error_log("SSO Service error: {$th->getMessage()}");
         }
 
         return $token;
@@ -442,8 +442,8 @@ class SSOService
 
         try {
             (new \GuzzleHttp\Client())->request('POST', $url, ['form_params' => $params]);
-        } catch (GuzzleException $e) {
-            log_exception($e);
+        } catch (\Throwable $th) {
+            error_log("SSO Service error: {$th->getMessage()}");
         }
     }
 
@@ -490,10 +490,8 @@ class SSOService
 
             // Validate retrieved user is owner of token
             $token->validateSub($user['sub'] ?? '');
-        } catch (GuzzleException $e) {
-            log_exception($e);
-        } catch (Exception $e) {
-            return '[Keycloak Service] '.print_r($e->getMessage(), true);
+        } catch (\Throwable $th) {
+            error_log("SSO Service error: {$th->getMessage()}");
         }
 
         return $user;
@@ -572,10 +570,8 @@ class SSOService
 
             $response_body = $response->getBody()->getContents();
             $token = json_decode($response_body, true);
-        } catch (GuzzleException $e) {
-            log_exception($e);
-        } catch (Exception $e) {
-            return '[Keycloak Service] ' . print_r($e->getMessage(), true);
+        } catch (\Throwable $th) {
+            error_log("SSO Service error: {$th->getMessage()}");
         }
 
         // Revoke previous impersonate user session if $token is not empty
