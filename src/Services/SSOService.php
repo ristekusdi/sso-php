@@ -8,7 +8,11 @@ use RistekUSDI\SSO\PHP\Support\OpenIDConfig;
 
 class SSOService
 {
-    use SSOServiceTrait;
+    use SSOServiceTrait {
+        saveToken as private traitSaveToken;
+        retrieveToken as private traitRetrieveToken;
+        forgetToken as private traitForgetToken;
+    }
 
     /**
      * Keycloak URL
@@ -154,6 +158,21 @@ class SSOService
     protected function getState()
     {
         return $this->state;
+    }
+
+    public function saveToken($credentials)
+    {
+        return $this->traitSaveToken($credentials);
+    }
+
+    public function retrieveToken()
+    {
+        return $this->traitRetrieveToken();
+    }
+
+    public function forgetToken()
+    {
+        return $this->traitForgetToken();
     }
 
     /**
