@@ -8,8 +8,8 @@ trait SSOServiceTrait {
     /**
      * The Session key for token
      */
-    protected $sso_session = '_sso_token';
-    protected $sso_session_impersonate = '_sso_token_impersonate';
+    protected $sso_token = '_sso_token';
+    protected $sso_token_impersonate = '_sso_token_impersonate';
 
     /**
      * The Session key for state
@@ -34,7 +34,7 @@ trait SSOServiceTrait {
 
         $decoded_access_token = (new AccessToken($credentials))->parseAccessToken();
         if (isset($decoded_access_token['impersonator'])) {
-            $_SESSION[$this->sso_session_impersonate] = $credentials;
+            $_SESSION[$this->sso_token_impersonate] = $credentials;
         } else {
             $previous_credentials = $this->retrieveRegularToken();
             // Forget impersonate token session
@@ -43,7 +43,7 @@ trait SSOServiceTrait {
             if (!is_null($previous_credentials)) {
                 $this->forgetImpersonateToken();
             }
-            $_SESSION[$this->sso_session] = $credentials;
+            $_SESSION[$this->sso_token] = $credentials;
         }
     }
     
@@ -54,10 +54,10 @@ trait SSOServiceTrait {
      */
     protected function retrieveToken()
     {
-        if (isset($_SESSION[$this->sso_session_impersonate])) {
-            return $_SESSION[$this->sso_session_impersonate];
-        } else if (isset($_SESSION[$this->sso_session])) {
-            return $_SESSION[$this->sso_session];
+        if (isset($_SESSION[$this->sso_token_impersonate])) {
+            return $_SESSION[$this->sso_token_impersonate];
+        } else if (isset($_SESSION[$this->sso_token])) {
+            return $_SESSION[$this->sso_token];
         } else {
             return '';
         }
@@ -71,10 +71,10 @@ trait SSOServiceTrait {
     protected function forgetToken()
     {
         // Remove all session variables.
-        if (isset($_SESSION[$this->sso_session_impersonate])) {
+        if (isset($_SESSION[$this->sso_token_impersonate])) {
             $this->forgetImpersonateToken();
-        } else if (isset($_SESSION[$this->sso_session]))  {
-            unset($_SESSION[$this->sso_session]);
+        } else if (isset($_SESSION[$this->sso_token]))  {
+            unset($_SESSION[$this->sso_token]);
         }
         
         // Destroy the session
@@ -85,12 +85,12 @@ trait SSOServiceTrait {
 
     protected function retrieveRegularToken()
     {
-        return isset($_SESSION[$this->sso_session]) ? $_SESSION[$this->sso_session] : '';
+        return isset($_SESSION[$this->sso_token]) ? $_SESSION[$this->sso_token] : '';
     }
 
     protected function retrieveImpersonateToken()
     {
-        return isset($_SESSION[$this->sso_session_impersonate]) ? $_SESSION[$this->sso_session_impersonate] : '';
+        return isset($_SESSION[$this->sso_token_impersonate]) ? $_SESSION[$this->sso_token_impersonate] : '';
     }
 
      /**
@@ -100,7 +100,7 @@ trait SSOServiceTrait {
      */
     protected function forgetImpersonateToken()
     {
-        unset($_SESSION[$this->sso_session_impersonate]);
+        unset($_SESSION[$this->sso_token_impersonate]);
     }
 
     /**
@@ -129,7 +129,7 @@ trait SSOServiceTrait {
             session_start();
         }
 
-        $_SESSION[$this->sso_state] = $this->state;
+        $_SESSION[$this->sso_state] = $this->getState();
     }
 
     /**
