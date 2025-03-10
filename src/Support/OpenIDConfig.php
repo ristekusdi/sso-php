@@ -4,6 +4,8 @@ namespace RistekUSDI\SSO\PHP\Support;
 
 class OpenIDConfig
 {
+    use OpenIDConfigTrait;
+
     /**
      * Keycloak URL
      *
@@ -25,13 +27,6 @@ class OpenIDConfig
      */
     protected $openid;
 
-    /**
-     * Keycloak OpenId Cache Configuration
-     *
-     * @var array
-     */
-    protected $cacheOpenid;
-
     public function __construct()
     {
         if (is_null($this->baseUrl)) {
@@ -41,24 +36,20 @@ class OpenIDConfig
         if (is_null($this->realm)) {
             $this->realm = $_SERVER['KEYCLOAK_REALM'];
         }
-
-        if (is_null($this->cacheOpenid)) {
-            $this->cacheOpenid = isset($_SERVER['KEYCLOAK_CACHE_OPENID']) ? $_SERVER['KEYCLOAK_CACHE_OPENID'] : false;
-        }
     }
 
     protected function config()
     {
-        $cacheKey = 'sso_web_guard_openid-' . $this->realm . '-' . md5($this->baseUrl);
+        $cacheKey = 'sso_openid-' . $this->realm . '-' . md5($this->baseUrl);
 
         // From cache?
-        // if ($this->cacheOpenid) {
-        //     $configuration = Cache::get($cacheKey, []);
+        if ($this->hasCache($cacheKey)) {
+            $configuration = $this->getCache($cacheKey);
 
-        //     if (! empty($configuration)) {
-        //         return $configuration;
-        //     }
-        // }
+            if (!empty($configuration)) {
+                return $configuration;
+            }
+        }
 
         // Request if cache empty or not using
         $url = $this->baseUrl . '/realms/' . $this->realm;
@@ -66,18 +57,21 @@ class OpenIDConfig
 
         $configuration = [];
 
-        $response = (new \GuzzleHttp\Client())->request('GET', $url);
+        $response = (new \GuzzleHttp\Client())->request('GET', $url, [
+            // Timeout if the client fails to connect to the server in 10 seconds.
+            'connect_timeout' => 10,
+            // Allow a total of 30 seconds for the complete request/response cycle.
+            'timeout' => 30
+        ]);
 
         if ($response->getStatusCode() !== 200) {
-            throw new Exception('[SSO Error] It was not possible to load OpenId configuration: ' . $response->getStatusCode());
+            throw new \Exception('[SSO Error] It was not possible to load OpenId configuration: ' . $response->getStatusCode());
         }
 
         $configuration = json_decode($response->getBody()->getContents(), true);
 
         // Save cache
-        // if ($this->cacheOpenid) {
-        //     Cache::put($cacheKey, $configuration);
-        // }
+        $this->putCache($cacheKey, $configuration);
 
         return $configuration;
     }
