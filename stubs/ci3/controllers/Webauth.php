@@ -58,7 +58,7 @@ class Webauth extends CI_Controller {
                 (new WebGuard())->validate($token);
 
                 // You may need to create a custom session for your internal app
-                $this->createSession();
+                $this->websession->create((new WebGuard)->user());
 
                 redirect('home', 'location', 301);
             } catch (\Exception $e) {
@@ -91,75 +91,14 @@ class Webauth extends CI_Controller {
         }
     }
 
-    /**
-     * You may be create a session to get roles and permission that belongs to each role.
-     * After user logged in, they may have list of roles based on a client (app) that stored in client_roles property.
-     * Use "client_roles" property as parameter to get roles and permissions in your app database.
-     * Expected result is a serialize of array that store in a session called serialize session.
-     * The array contains:
-     * - roles (list of roles with permissions belongs to each role)
-     * - role (active or current role)
-     */
-    private function createSession()
-    {
-        $client_roles = (new WebGuard)->user()->client_roles;
-
-        $roles = $this->db->query("SELECT role_id AS id, role_name as `name` FROM rbac_roles
-        WHERE rbac_roles.role_name IN ?", array($client_roles))->result();
-
-        foreach ($roles as $key => $role) {
-            $role_permissions = $this->db->query("SELECT rbac_permissions.perm_desc 
-            FROM rbac_permissions
-            INNER JOIN rbac_role_perm ON rbac_role_perm.perm_id = rbac_permissions.perm_id
-            WHERE rbac_role_perm.`role_id` = ?", array($role->id))->result_array();
-
-            $roles[$key]->permissions = array_column($role_permissions, 'perm_desc');
-        }
-
-        // NOTE: You maybe want to get roles from your database by using $client_roles
-        // and put permissions to each role.
-        // Here's is the expected result.
-        // $roles = json_decode(json_encode([
-        //     [
-        //         'id' => 1,
-        //         'name' => 'Operator',
-        //         'permissions' => [
-        //             'user:view',
-        //             'user:edit',
-        //         ]
-        //     ],
-        //     [
-        //         'id' => 2,
-        //         'name' => 'User',
-        //         'permissions' => [
-        //             'profile:view',
-        //             'profile:edit',
-        //         ]
-        //     ],
-        // ]));
-        
-        $_SESSION['serialize_session'] = serialize(array(
-            'roles' => $roles,
-            'role' => $roles[0], // This is a active or current role
-        ));       
-    }
-
-    /**
-     * Change current role
-     */
     public function changeRole()
     { 
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
 
-        $role = $this->input->post('role');
-        $unserialize_session = unserialize($_SESSION['serialize_session']);
-        $unserialize_session['role'] = $role;
+        $response = $this->websession->changeRole();
 
-        $serialize_session = serialize($unserialize_session);
-        $_SESSION['serialize_session'] = $serialize_session;
-
-        http_response_code(204);
+        http_response_code($response['code']);
         header('Content-Type: application/json');
     }
 
@@ -171,14 +110,9 @@ class Webauth extends CI_Controller {
         // Check if this session active? If not then redirect to login page.
         $this->webguard->authenticated();
 
-        $value = $this->input->post('value');
-        $unserialize_session = unserialize($_SESSION['serialize_session']);
-        $unserialize_session[$this->input->post('key')] = $value;
-        
-        $serialize_session = serialize($unserialize_session);
-        $_SESSION['serialize_session'] = $serialize_session;
+        $response = $this->websession->changeKeyValue();
 
-        http_response_code(204);
+        http_response_code($response['code']);
         header('Content-Type: application/json');
     }
 }
