@@ -1,7 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-use RistekUSDI\SSO\PHP\Exceptions\CallbackException;
 use RistekUSDI\SSO\PHP\Services\SSOService;
 use RistekUSDI\SSO\PHP\Auth\Guard\WebGuard;
 
@@ -39,14 +38,16 @@ class Webauth extends CI_Controller {
             $error = $_GET['error_description'];
             $error = !empty($error) ? $error : $_GET['error'];
 
-            throw new CallbackException(401, $error);
+            echo "SSO Service error: {$error} with HTTP code response 401";
+            exit();
         }
 
         $state = $_GET['state'];
         if (empty($state) || ! (new SSOService())->validateState($state)) {
             (new SSOService())->forgetState();
 
-            throw new CallbackException(401, 'Invalid state');
+            echo "SSO Service error: Invalid state with HTTP code response 401";
+            exit();
         }
 
         $code = $_GET['code'];
@@ -61,7 +62,8 @@ class Webauth extends CI_Controller {
 
                 redirect('home', 'location', 301);
             } catch (\Exception $e) {
-                throw new CallbackException($e->getCode(), $e->getMessage());
+                echo "SSO Service error: {$e->getMessage()} with HTTP code response {$e->getCode()}";
+                exit();
             }
         }
     }
