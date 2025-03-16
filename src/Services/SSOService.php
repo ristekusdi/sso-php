@@ -134,6 +134,16 @@ class SSOService
     }
 
     /**
+     * Return the state for requests
+     *
+     * @return string
+     */
+    protected function getState()
+    {
+        return $this->state;
+    }
+
+    /**
      * Return the callback url
      *
      * @return string
@@ -151,16 +161,6 @@ class SSOService
     public function getRedirectUrl()
     {
         return $this->redirectUrl;
-    }
-
-    /**
-     * Return the state for requests
-     *
-     * @return string
-     */
-    protected function getState()
-    {
-        return $this->state;
     }
 
     public function saveToken($credentials)
@@ -188,7 +188,7 @@ class SSOService
         return $this->traitSaveState();
     }
 
-    public function fotgetState()
+    public function forgetState()
     {
         return $this->traitForgetState();
     }
