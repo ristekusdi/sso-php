@@ -27,6 +27,13 @@ class OpenIDConfig
      */
     protected $openid;
 
+    /**
+     * Keycloak OpenId Cache Configuration
+     *
+     * @var array
+     */
+    protected $cacheOpenid;
+
     public function __construct()
     {
         if (is_null($this->baseUrl)) {
@@ -35,6 +42,10 @@ class OpenIDConfig
 
         if (is_null($this->realm)) {
             $this->realm = $_SERVER['KEYCLOAK_REALM'];
+        }
+
+        if (is_null($this->cacheOpenid)) {
+            $this->cacheOpenid = isset($_SERVER['KEYCLOAK_CACHE_OPENID']) ? $_SERVER['KEYCLOAK_CACHE_OPENID'] : false;
         }
     }
 
