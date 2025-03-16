@@ -2,7 +2,6 @@
 
 namespace RistekUSDI\SSO\PHP\Services;
 
-use Exception;
 use RistekUSDI\SSO\PHP\Auth\AccessToken;
 use RistekUSDI\SSO\PHP\Support\OpenIDConfig;
 
@@ -48,16 +47,8 @@ class SSOService
     /**
      * Keycloak OpenId Configuration
      *
-     * @var array
      */
     protected $openid;
-
-    /**
-     * Keycloak OpenId Cache Configuration
-     *
-     * @var array
-     */
-    protected $cacheOpenid;
 
     /**
      * CallbackUrl
@@ -98,9 +89,7 @@ class SSOService
             $this->clientSecret = $_SERVER['KEYCLOAK_CLIENT_SECRET'];
         }
 
-        if (is_null($this->cacheOpenid)) {
-            $this->cacheOpenid = isset($_SERVER['KEYCLOAK_CACHE_OPENID']) ? $_SERVER['KEYCLOAK_CACHE_OPENID'] : false;
-        }
+        $this->openid = (new OpenIDConfig);
 
         if (is_null($this->callbackUrl)) {
             $this->callbackUrl = $_SERVER['KEYCLOAK_CALLBACK'];
@@ -202,7 +191,7 @@ class SSOService
      */
     public function getLoginUrl()
     {
-        $url = (new OpenIDConfig)->get('authorization_endpoint');
+        $url = $this->openid->get('authorization_endpoint');
         $params = [
             'scope' => 'openid',
             'response_type' => 'code',
@@ -232,7 +221,7 @@ class SSOService
         } else {
             $id_token = isset($token['id_token']) ? $token['id_token'] : null;
             
-            $url = (new OpenIDConfig)->get('end_session_endpoint');
+            $url = $this->openid->get('end_session_endpoint');
             $params = [
                 'client_id' => $this->getClientId(),
             ];
@@ -254,7 +243,7 @@ class SSOService
      */
     public function getAccessToken($code)
     {
-        $url = (new OpenIDConfig)->get('token_endpoint');
+        $url = $this->openid->get('token_endpoint');
         $params = [
             'code' => $code,
             'client_id' => $this->getClientId(),
@@ -294,7 +283,7 @@ class SSOService
             return [];
         }
 
-        $url = (new OpenIDConfig)->get('token_endpoint');
+        $url = $this->openid->get('token_endpoint');
         $params = [
             'client_id' => $this->getClientId(),
             'grant_type' => 'refresh_token',
@@ -330,7 +319,7 @@ class SSOService
      */
     public function invalidateRefreshToken($refreshToken)
     {
-        $url = (new OpenIDConfig)->get('end_session_endpoint');
+        $url = $this->openid->get('end_session_endpoint');
         $params = [
             'client_id' => $this->getClientId(),
             'refresh_token' => $refreshToken,
@@ -367,13 +356,13 @@ class SSOService
 
             $claims = array(
                 'aud' => $this->getClientId(),
-                'iss' => $url = (new OpenIDConfig)->get('issuer'),
+                'iss' => $url = $this->openid->get('issuer'),
             );
 
             $token->validateIdToken($claims);
 
             // Get userinfo
-            $url = (new OpenIDConfig)->get('userinfo_endpoint');
+            $url = $this->openid->get('userinfo_endpoint');
             $headers = [
                 'Authorization' => 'Bearer ' . $token->getAccessToken(),
                 'Accept' => 'application/json',
@@ -442,7 +431,7 @@ class SSOService
         try {
             $credentials = $this->refreshTokenIfNeeded($credentials);
             
-            $url = (new OpenIDConfig)->get('token_endpoint');
+            $url = $this->openid->get('token_endpoint');
             
             $headers = [
                 'Content-Type' => 'application/x-www-form-urlencoded',
@@ -465,7 +454,7 @@ class SSOService
             $response = (new \GuzzleHttp\Client())->request('POST', $url, ['headers' => $headers, 'form_params' => $form_params]);
             
             if ($response->getStatusCode() !== 200) {
-                throw new Exception('User not allowed to impersonate', 403);
+                throw new \Exception('User not allowed to impersonate', 403);
             }
 
             $response_body = $response->getBody()->getContents();
@@ -492,7 +481,7 @@ class SSOService
     {
         return array(
             'aud' => $this->getClientId(),
-            'iss' => (new OpenIDConfig)->get('issuer'),
+            'iss' => $this->openid->get('issuer'),
         );
     }
 }
