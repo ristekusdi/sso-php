@@ -54,7 +54,7 @@ class OpenIDConfig
         $cacheKey = 'sso_openid-' . $this->realm . '-' . md5($this->baseUrl);
 
         // From cache?
-        if ($this->hasCache($cacheKey)) {
+        if ($this->cacheOpenid) {
             $configuration = $this->getCache($cacheKey);
 
             if (!empty($configuration)) {
