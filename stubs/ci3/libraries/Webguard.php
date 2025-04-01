@@ -20,7 +20,9 @@ class Webguard {
     public function authenticated()
     {
         if (! $this->check()) {
-            redirect('/sso/login');
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: ' . site_url('/sso/login'));
+            exit;
         }
     }
 

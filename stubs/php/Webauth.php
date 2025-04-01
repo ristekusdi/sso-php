@@ -10,7 +10,8 @@ class Webauth
         $sso = new SSOService;
         $url = $sso->getLoginUrl();
         $sso->saveState();
-    
+        
+        header('HTTP/1.1 302 Found');
         header('Location: ', $url);
         exit();
     }
@@ -22,6 +23,8 @@ class Webauth
         // NOTE: forgetToken must be after getLogoutUrl().
         // Otherwise the logout form will show error message: id_token_hint not found!
         $sso->forgetToken();
+
+        header('HTTP/1.1 302 Found');
         header('Location: ', $url);
         exit();
     }
@@ -55,6 +58,7 @@ class Webauth
                 $this->createSession();
 
                 // Change redirect based on your need!
+                header('HTTP/1.1 301 Moved Permanently');
                 header('Location: dashboard.php');
                 exit();
             } catch (\Exception $e) {
@@ -79,7 +83,9 @@ class Webauth
 
             $this->createSession();
 
-            redirect('/home');
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: dashboard.php');
+            exit();
         } catch (\Throwable $th) {
             echo "Status code: {$th->getCode()} \n";
             echo "Error message: {$th->getMessage()}\n";

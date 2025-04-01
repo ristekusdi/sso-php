@@ -22,7 +22,7 @@ trait OpenIDConfigTrait {
     }
 
     // Delete item from cache
-    public function deleteCache($key)
+    public function forgetCache($key)
     {
         if (array_key_exists($key, $this->cache)) {
             unset($this->cache[$key]);

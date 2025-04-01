@@ -19,7 +19,9 @@ class Webauth extends CI_Controller {
         $url = $sso->getLoginUrl();
         $sso->saveState();
 
-        return redirect($url);
+        header('HTTP/1.1 302 Found');
+        header('Location: ' . $url);
+        exit;
     }
 
     public function logout()
@@ -29,7 +31,10 @@ class Webauth extends CI_Controller {
         // NOTE: forgetToken must be after getLogoutUrl().
         // Otherwise the logout form will show error message: id_token_hint not found!
         $sso->forgetToken();
-        return redirect($url);
+
+        header('HTTP/1.1 302 Found');
+        header('Location: ' . $url);
+        exit;
     }
 
     public function callback()
@@ -60,7 +65,9 @@ class Webauth extends CI_Controller {
                 // You may need to create a custom session for your internal app
                 $this->websession->create((new WebGuard)->user());
 
-                redirect('home', 'location', 301);
+                header('HTTP/1.1 301 Moved Permanently');
+                header('Location: ' . site_url('/home'));
+                exit;
             } catch (\Exception $e) {
                 echo "SSO Service error: {$e->getMessage()} with HTTP code response {$e->getCode()}";
                 exit();
@@ -83,7 +90,9 @@ class Webauth extends CI_Controller {
 
             $this->createSession();
 
-            redirect('home', 'location', 301);
+            header('HTTP/1.1 301 Moved Permanently');
+            header('Location: ' . site_url('/home'));
+            exit;
         } catch (\Throwable $th) {
             echo "Status code: {$th->getCode()} \n";
             echo "Error message: {$th->getMessage()}\n";
