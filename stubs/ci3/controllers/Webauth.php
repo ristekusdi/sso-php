@@ -77,14 +77,8 @@ class Webauth extends CI_Controller {
 
     public function impersonate()
     {
-        $username = $this->input->post('username');
-        $credentials = (new SSOService())->retrieveToken();
         try {
-            $token = (new SSOService())->impersonate($credentials, $username);
-
-            if (empty($token)) {
-                throw new Exception("User with username {$username} not found!", 404);
-            }
+            $token = (new SSOService())->impersonate($this->input->post('username'));
             
             (new WebGuard())->validate($token);
 

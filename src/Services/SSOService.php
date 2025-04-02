@@ -432,15 +432,15 @@ class SSOService
      * 1. Enable feature Token Exchange, Fine-Grained Admin Permissions, and Account Management REST API in Keycloak.
      * 2. Register user(s) as impersonator in impersonate scope user permissions.
      * 
-     * @param username, credentials (access token of impersonator)
+     * @param username
      * @return array|exception
      */
-    public function impersonate($username, $credentials = array())
+    public function impersonate($username)
     {
-        $token = [];
-        
         try {
-            $credentials = $this->refreshTokenIfNeeded($credentials);
+            $token = [];
+            
+            $credentials = $this->refreshTokenIfNeeded($this->retrieveToken());
             
             $url = (new OpenIDConfig)->get('token_endpoint');
             
@@ -457,32 +457,39 @@ class SSOService
                 // Set scope value to openid to get id_token
                 'scope' => 'openid',
             ];
-
+            
             if (!empty($this->getClientSecret())) {
                 $form_params['client_secret'] = $this->getClientSecret();
             }
-            
+
             $response = (new \GuzzleHttp\Client())->request('POST', $url, ['headers' => $headers, 'form_params' => $form_params]);
-            
-            if ($response->getStatusCode() !== 200) {
-                throw new Exception('User not allowed to impersonate', 403);
-            }
 
             $response_body = $response->getBody()->getContents();
             $token = json_decode($response_body, true);
+            
+            // Check for error in response body
+            if (isset($token['error'])) {
+                throw new Exception($token['error'] . (isset($token['error_description']) ? ' - ' . $token['error_description'] : ''), $response->getStatusCode());
+            }
+
+            // Only proceed if we have a valid token
+            if (empty($token) || !isset($token['access_token'])) {
+                throw new Exception('Invalid token response', $response->getStatusCode());
+            }
+
+            // Revoke previous impersonate user session if $token is not empty
+            if (!empty($token)) {
+                $impersonate_user_token = $this->retrieveImpersonateToken();
+                if (!empty($impersonate_user_token)) {
+                    $this->invalidateRefreshToken($impersonate_user_token['refresh_token']);
+                }
+            }
+
+            return $token;
         } catch (\Throwable $th) {
             $this->logError($th->getMessage());
+            throw $th;
         }
-
-        // Revoke previous impersonate user session if $token is not empty
-        if (!empty($token)) {
-            $impersonate_user_token = $this->retrieveImpersonateToken();
-            if (!empty($impersonate_user_token)) {
-                $this->invalidateRefreshToken($impersonate_user_token['refresh_token']);
-            }
-        }
-
-        return $token;
     }
 
     /**
