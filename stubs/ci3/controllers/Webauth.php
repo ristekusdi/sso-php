@@ -82,7 +82,7 @@ class Webauth extends CI_Controller {
             
             (new WebGuard())->validate($token);
 
-            $this->createSession();
+            $this->websession->create((new WebGuard)->user());
 
             header('HTTP/1.1 301 Moved Permanently');
             header('Location: ' . site_url('/home'));
