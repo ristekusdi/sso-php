@@ -103,6 +103,7 @@ class Webauth extends CI_Controller {
 
         http_response_code($response['code']);
         header('Content-Type: application/json');
+        exit;
     }
 
     /**
@@ -117,5 +118,6 @@ class Webauth extends CI_Controller {
 
         http_response_code($response['code']);
         header('Content-Type: application/json');
+        exit;
     }
 }
