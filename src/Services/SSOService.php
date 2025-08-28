@@ -188,7 +188,7 @@ class SSOService
         return $this->traitSaveState();
     }
 
-    public function fotgetState()
+    public function forgetState()
     {
         return $this->traitForgetState();
     }
