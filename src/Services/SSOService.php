@@ -98,6 +98,8 @@ class SSOService
             $this->clientSecret = $_SERVER['KEYCLOAK_CLIENT_SECRET'];
         }
 
+        $this->openid = (new OpenIDConfig);
+
         if (is_null($this->cacheOpenid)) {
             $this->cacheOpenid = isset($_SERVER['KEYCLOAK_CACHE_OPENID']) ? $_SERVER['KEYCLOAK_CACHE_OPENID'] : false;
         }
@@ -202,7 +204,7 @@ class SSOService
      */
     public function getLoginUrl()
     {
-        $url = (new OpenIDConfig)->get('authorization_endpoint');
+        $url = $this->openid->get('authorization_endpoint');
         $params = [
             'scope' => 'openid',
             'response_type' => 'code',
@@ -232,7 +234,7 @@ class SSOService
         } else {
             $id_token = isset($token['id_token']) ? $token['id_token'] : null;
             
-            $url = (new OpenIDConfig)->get('end_session_endpoint');
+            $url = $this->openid->get('end_session_endpoint');
             $params = [
                 'client_id' => $this->getClientId(),
             ];
@@ -254,7 +256,7 @@ class SSOService
      */
     public function getAccessToken($code)
     {
-        $url = (new OpenIDConfig)->get('token_endpoint');
+        $url = $this->openid->get('token_endpoint');
         $params = [
             'code' => $code,
             'client_id' => $this->getClientId(),
@@ -294,7 +296,7 @@ class SSOService
             return [];
         }
 
-        $url = (new OpenIDConfig)->get('token_endpoint');
+        $url = $this->openid->get('token_endpoint');
         $params = [
             'client_id' => $this->getClientId(),
             'grant_type' => 'refresh_token',
@@ -330,7 +332,7 @@ class SSOService
      */
     public function invalidateRefreshToken($refreshToken)
     {
-        $url = (new OpenIDConfig)->get('end_session_endpoint');
+        $url = $this->openid->get('end_session_endpoint');
         $params = [
             'client_id' => $this->getClientId(),
             'refresh_token' => $refreshToken,
@@ -367,13 +369,13 @@ class SSOService
 
             $claims = array(
                 'aud' => $this->getClientId(),
-                'iss' => $url = (new OpenIDConfig)->get('issuer'),
+                'iss' => $this->openid->get('issuer'),
             );
 
             $token->validateIdToken($claims);
 
             // Get userinfo
-            $url = (new OpenIDConfig)->get('userinfo_endpoint');
+            $url = $this->openid->get('userinfo_endpoint');
             $headers = [
                 'Authorization' => 'Bearer ' . $token->getAccessToken(),
                 'Accept' => 'application/json',
@@ -442,7 +444,7 @@ class SSOService
             
             $credentials = $this->refreshTokenIfNeeded($this->retrieveToken());
             
-            $url = (new OpenIDConfig)->get('token_endpoint');
+            $url = $this->openid->get('token_endpoint');
             
             $headers = [
                 'Content-Type' => 'application/x-www-form-urlencoded',
@@ -499,7 +501,7 @@ class SSOService
     {
         return array(
             'aud' => $this->getClientId(),
-            'iss' => (new OpenIDConfig)->get('issuer'),
+            'iss' => $this->openid->get('issuer'),
         );
     }
 }
