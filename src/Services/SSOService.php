@@ -213,8 +213,10 @@ class SSOService
         $token = $this->retrieveToken();
 
         $decoded_access_token = (new AccessToken($token))->parseAccessToken();
-        
-        $this->invalidateRefreshToken($token['refresh_token']);
+
+        if (isset($token['refresh_token'])){
+            $this->invalidateRefreshToken($token['refresh_token']);
+        }
 
         if (isset($decoded_access_token['impersonator'])) {
             return $this->getRedirectUrl();
