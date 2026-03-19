@@ -22,8 +22,8 @@ if (!function_exists('build_http_query')) {
 /**
  * Build a URL with params
  *
- * @param  string $url
- * @param  array $params
+ * @param  string  $url
+ * @param  array  $params
  * @return string
  */
 if (!function_exists('build_url')) {
@@ -31,20 +31,20 @@ if (!function_exists('build_url')) {
     {
         $parsedUrl = parse_url($url);
         if (empty($parsedUrl['host'])) {
-            return trim($url, '?') . '?' . build_http_query($params);
+            return trim($url, '?').'?'.build_http_query($params);
         }
 
-        if (! empty($parsedUrl['port'])) {
-            $parsedUrl['host'] .= ':' . $parsedUrl['port'];
+        if (!empty($parsedUrl['port'])) {
+            $parsedUrl['host'] .= ':'.$parsedUrl['port'];
         }
 
         $parsedUrl['scheme'] = (empty($parsedUrl['scheme'])) ? 'https' : $parsedUrl['scheme'];
         $parsedUrl['path'] = (empty($parsedUrl['path'])) ? '' : $parsedUrl['path'];
 
-        $url = $parsedUrl['scheme'] . '://' . $parsedUrl['host'] . $parsedUrl['path'];
+        $url = $parsedUrl['scheme'].'://'.$parsedUrl['host'].$parsedUrl['path'];
         $query = [];
 
-        if (! empty($parsedUrl['query'])) {
+        if (!empty($parsedUrl['query'])) {
             $parsedUrl['query'] = explode('&', $parsedUrl['query']);
 
             foreach ($parsedUrl['query'] as $value) {
@@ -63,29 +63,43 @@ if (!function_exists('build_url')) {
 
         $query = array_merge($query, $params);
 
-        return $url . '?' . build_http_query($query);
+        return $url.'?'.build_http_query($query);
     }
 }
 
 if (!function_exists('url')) {
     function url($params = '')
     {
-        $link = '';
-        if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') {
-            $link = 'https';
-        } else {
-            $link = 'http';
+        // Passing preg_match and trim is deprecated.
+        if (is_null($params)) {
+            $params = '';
         }
 
-        // Append common URL characters
-        $link .= '://';
+        // Determine if the given path is a valid URL.
+        if (preg_match('~^(#|//|https?://|(mailto|tel|sms):)~', $params)) {
+            if (filter_var($params, FILTER_VALIDATE_URL) !== false) {
+                return $params;
+            }
+        }
 
-        // Append the host (domain name, ip) to the URL.
-        $link .= $_SERVER['HTTP_HOST'];
+        // Get the default scheme for a raw URL.
+        $secure = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on';
+        $scheme = $secure ? 'https://' : 'http://';
 
-        // Append the requested resource location to the URL.
-        $link .= !empty($params) ? $params : $_SERVER['REQUEST_URI'];
+        // Get the base URL for the request.
+        $root = $scheme.$_SERVER['HTTP_HOST'];
 
-        return $link;
+        // Extract the query string from the given path.
+        if (($queryPosition = strpos($params, '?')) !== false) {
+            [$path, $query] = [
+                substr($params, 0, $queryPosition),
+                substr($params, $queryPosition),
+            ];
+        } else {
+            [$path, $query] = [$params, ''];
+        }
+
+        // Format the given URL segments into a single URL.
+        return trim($root.'/'.trim($path, '/'), '/').$query;
     }
 }
