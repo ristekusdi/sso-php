@@ -71,8 +71,9 @@ if (!function_exists('url')) {
     function url($params = '')
     {
         // Passing preg_match and trim is deprecated.
-        if (is_null($params)) {
-            $params = '';
+        // Fallback to REQUEST_URI on empty
+        if (empty($params)) {
+            $params = $_SERVER['REQUEST_URI'] ?? '';
         }
 
         // Determine if the given path is a valid URL.
