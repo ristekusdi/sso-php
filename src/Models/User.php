@@ -121,4 +121,14 @@ class User implements Authenticatable
     {
         throw new \BadMethodCallException('Unexpected method [getRememberTokenName] call');
     }
+
+    /**
+     * Get the name of the password attribute for the user.
+     *
+     * @return string
+     */
+    public function getAuthPasswordName()
+    {
+        throw new \BadMethodCallException('Unexpected method [getAuthPasswordName] call');
+    }
 }
